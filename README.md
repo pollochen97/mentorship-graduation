@@ -27,7 +27,7 @@ npm run dev                  # http://localhost:3000
 
 ## 開發流程
 
-1. 到 Project board 認領 issue：指派給自己，狀態改成 In Progress。
+1. 到 Project board 認領 issue：指派給自己，狀態改成 In processing。
 2. 開分支 `feat/<issue編號>-<名稱>`，例如 `feat/10-sailors`。
 3. **只改 issue 列出的「負責的檔案」**。需要動到別人的檔案時，先在該 issue 留言。
 4. 發 PR 時寫上 `Closes #<編號>`，在 Vercel preview 上驗收後用 squash merge 合併。
