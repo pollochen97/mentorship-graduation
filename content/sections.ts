@@ -1,33 +1,10 @@
 // Content for the chapters built on SectionPage (#11): audition, welcome, monthly meetings 1–3, meetups.
-// The shape is set by #11; the values belong to #7.
+// The shape is in content/types.ts; the values belong to #7.
 // TODO(#7): everything below is sample copy from docs/flipbook-demo.html. Replace the dates, text,
 // numbers and steps with the real ones, and add photos under public/photos/<key>/.
-import type { Accent, Photo, PhotoLayout } from "@/components/ui";
+import type { Section, SectionKey } from "./types";
 
-export type SectionKey = "audition" | "welcome" | "m1" | "m2" | "m3" | "meetups";
-
-export type SectionContent = {
-  /** Text after "LOG 06 ·" on the chapter label, e.g. the meeting's theme. */
-  tag: string;
-  title: string;
-  /** Shown as a stamp, e.g. "2026.07.26" or "2026.06.14 — 06.15". */
-  date: string;
-  /** Small text on the stamp; defaults to "Port of call". */
-  place?: string;
-  /** One short paragraph, about 50–80 characters. */
-  text: string;
-  accent: Accent;
-  /** hero = 1 photo, grid2 = 2, grid3 = 6, mosaic = 3. Missing photos show a placeholder. */
-  layout: PhotoLayout;
-  /** Paths under public/, e.g. { src: "/photos/m1/01.jpg", alt: "分組討論" }. */
-  photos: Photo[];
-  /** Big numbers in boxes, e.g. applicant count (audition). */
-  stats?: { value: string; label: string }[];
-  /** Numbered steps above the photos, e.g. the audition process. */
-  steps?: string[];
-};
-
-export const SECTIONS: Record<SectionKey, SectionContent> = {
+export const SECTIONS: Record<SectionKey, Section> = {
   audition: {
     tag: "AUDITION",
     title: "海選",
