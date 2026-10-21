@@ -6,6 +6,25 @@
 - 視覺與互動參考：[`docs/flipbook-demo.html`](docs/flipbook-demo.html)（直接用瀏覽器開啟）
 - 技術：Next.js（App Router）· Vercel · Supabase（Postgres / Realtime Broadcast / Storage）
 
+## 本機開發
+
+需要 Node.js 22 以上（`@supabase/supabase-js` 的最低需求）。有裝 nvm 的話，執行 `nvm use` 就會切到 `.nvmrc` 指定的版本。
+
+```bash
+npm install
+cp .env.example .env.local   # 前端開發保持 NEXT_PUBLIC_USE_MOCK=1，不用填 Supabase
+npm run dev                  # http://localhost:3000
+```
+
+| 指令                | 用途                                |
+| ------------------- | ----------------------------------- |
+| `npm run lint`      | ESLint                              |
+| `npm run typecheck` | 先產生 Next.js 路由型別，再跑 `tsc` |
+| `npm run format`    | Prettier 排版                       |
+| `npm run build`     | 正式建置（PR 前請先跑過）           |
+
+> 這是 **Next.js 16**，有不少和舊版不同的地方，例如 middleware 已改名為 `proxy.ts`。寫程式前請先看 `node_modules/next/dist/docs/`（見 `AGENTS.md`）。
+
 ## 開發流程
 
 1. 到 Project board 認領 issue：指派給自己，狀態改成 In Progress。
