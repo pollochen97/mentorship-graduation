@@ -1,11 +1,11 @@
 # CI: every PR and every push to main must lint, typecheck and build.
-# CD is handled by Vercel's Git integration: PR → preview URL, merge to main → production.
+# CD is handled by Vercel's Git integration: PR and dev → preview URL, merge to main → production.
 name: CI
 
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 concurrency:
   group: ci-${{ github.ref }}

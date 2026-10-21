@@ -25,11 +25,26 @@ npm run dev                  # http://localhost:3000
 
 > 這是 **Next.js 16**，有不少和舊版不同的地方，例如 middleware 已改名為 `proxy.ts`。寫程式前請先看 `node_modules/next/dist/docs/`（見 `AGENTS.md`）。
 
+## 分支與部署
+
+| 分支     | 用途                     | 部署                       |
+| -------- | ------------------------ | -------------------------- |
+| `main`   | 正式版，活動當天投影用   | Vercel Production          |
+| `dev`    | 整合中的版本（預設分支） | Vercel Preview（固定網址） |
+| `feat/*` | 每張 issue 一個分支      | Vercel Preview（每個 PR）  |
+
+```
+feat/* ──squash merge──▶ dev ──merge commit（上線）──▶ main
+```
+
+- `main` 和 `dev` 都有保護：只能透過 PR 合併，CI 通過才能合併。
+- 上線由專案負責人開 `dev → main` 的 PR，**要用「Create a merge commit」，不要用 squash**。用 squash 的話，`main` 和 `dev` 的紀錄會分岔，下一次上線就會出現衝突。
+
 ## 開發流程
 
-1. 到 Project board 認領 issue：指派給自己，狀態改成 In Progress。
-2. 開分支 `feat/<issue編號>-<名稱>`，例如 `feat/10-sailors`。
+1. 到 Project board 認領 issue：指派給自己，狀態改成 In processing。
+2. 從最新的 `dev` 開分支 `feat/<issue編號>-<名稱>`，例如 `feat/10-sailors`。
 3. **只改 issue 列出的「負責的檔案」**。需要動到別人的檔案時，先在該 issue 留言。
-4. 發 PR 時寫上 `Closes #<編號>`，在 Vercel preview 上驗收後用 squash merge 合併。
+4. 發 PR 到 `dev`，描述寫上 `Closes #<編號>`。在 Vercel preview 上驗收後，用 squash merge 合併。
 5. P0 完成後，介面就凍結了：`lib/schemas.ts`、hook 簽名、Broadcast 事件名稱都不能隨意更改。要改時，開一個標 `contract` 的 PR，並在群組通知大家。
 6. 前端開發時設 `NEXT_PUBLIC_USE_MOCK=1`，不連 Supabase 也能跑。
