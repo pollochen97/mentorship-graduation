@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ibmPlexMono, notoSansTC } from "./fonts";
+import { ibmPlexMono, NOTO_SANS_TC_HREF } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,7 +10,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="zh-Hant" className={`${notoSansTC.variable} ${ibmPlexMono.variable}`}>
+    <html lang="zh-Hant" className={ibmPlexMono.variable}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="stylesheet" href={NOTO_SANS_TC_HREF} />
+      </head>
       <body>{children}</body>
     </html>
   );

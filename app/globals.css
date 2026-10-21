@@ -1,4 +1,9 @@
 /* Minimal reset only; design tokens and base styles belong to #2. */
+
+:root {
+  /* Loaded at runtime from Google Fonts in app/layout.tsx (not next/font; see app/fonts.ts) */
+  --font-noto-sans-tc: "Noto Sans TC";
+}
 *,
 *::before,
 *::after {
