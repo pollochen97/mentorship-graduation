@@ -55,6 +55,20 @@ function buildLeaves(guestbookPages: GuestbookPages): Leaf[] {
   });
 }
 
+/**
+ * Index of the page with this id. If that page was removed (fewer guestbook pages), falls back to the
+ * last remaining page of the same run, e.g. m1-guestbook-3 → m1-guestbook-2.
+ */
+function resolveIndex(leaves: Leaf[], id: string) {
+  const index = leaves.findIndex((leaf) => leaf.id === id);
+  if (index >= 0) return index;
+  const base = id.replace(/-\d+$/, "");
+  return Math.max(
+    0,
+    leaves.findLastIndex((leaf) => leaf.id === base || leaf.id.startsWith(`${base}-`)),
+  );
+}
+
 function hashId() {
   return decodeURIComponent(location.hash.slice(1));
 }
@@ -73,10 +87,9 @@ export function BookShell() {
   const leaves = useMemo(() => buildLeaves(guestbookPages), [guestbookPages]);
   // Track the current page by id, so pages inserted before it (more guestbook pages) don't move it.
   const [curId, setCurId] = useState(leaves[0].id);
-  const cur = Math.max(
-    0,
-    leaves.findIndex((leaf) => leaf.id === curId),
-  );
+  const cur = resolveIndex(leaves, curId);
+  // The current page was removed: settle on the page we fell back to, so the URL follows too.
+  if (leaves[cur].id !== curId) setCurId(leaves[cur].id);
   // While flipping, the leaves in between are raised above the rest and flip one after another.
   const [flip, setFlip] = useState<{ from: number; to: number; forward: boolean } | null>(null);
   // Skips the flip animation, for jumping straight to the page in the URL on load.
@@ -86,6 +99,8 @@ export function BookShell() {
   const live = useRef({ cur, leaves });
   const settleTimer = useRef<number | undefined>(undefined);
   const hashReady = useRef(false);
+  // A page from the URL that doesn't exist yet, e.g. #m1-guestbook-2 before the notes have loaded.
+  const pendingId = useRef<string | null>(null);
   const swipe = useRef<{ y: number; pointerId: number } | null>(null);
 
   useEffect(() => {
@@ -93,6 +108,7 @@ export function BookShell() {
   });
 
   const goTo = useCallback((target: number) => {
+    pendingId.current = null; // the reader moved on; stop waiting for the page in the URL
     const { cur, leaves } = live.current;
     const to = Math.max(0, Math.min(leaves.length - 1, target));
     if (to === cur) return;
@@ -126,28 +142,53 @@ export function BookShell() {
     );
   }, []);
 
-  // Open the page named in the URL hash without flipping through everything before it.
+  const exists = useCallback(
+    (id: string) => live.current.leaves.some((leaf) => leaf.id === id),
+    [],
+  );
+
+  // Show a page without flipping through everything before it.
+  const jumpInstantly = useCallback((id: string) => {
+    setInstant(true);
+    setCurId(id);
+    requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)));
+  }, []);
+
+  // Open the page named in the URL hash. Guestbook pages past the first only exist once the
+  // guestbook reports them, so remember those and open them when they appear (next effect).
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       const id = hashId();
-      if (id && live.current.leaves.some((leaf) => leaf.id === id)) {
-        setInstant(true);
-        setCurId(id);
-        requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)));
-      }
+      if (id && exists(id)) jumpInstantly(id);
+      else if (id) pendingId.current = id;
       hashReady.current = true;
     });
-    const onHashChange = () => goToId(hashId());
+    const onHashChange = () => {
+      const id = hashId();
+      if (exists(id)) goToId(id);
+      else if (id) pendingId.current = id;
+    };
     addEventListener("hashchange", onHashChange);
     return () => {
       cancelAnimationFrame(frame);
       removeEventListener("hashchange", onHashChange);
     };
-  }, [goToId]);
+  }, [exists, goToId, jumpInstantly]);
+
+  useEffect(() => {
+    const id = pendingId.current;
+    if (!id || !leaves.some((leaf) => leaf.id === id)) return;
+    requestAnimationFrame(() => {
+      if (pendingId.current !== id) return; // the reader flipped away in the meantime
+      pendingId.current = null;
+      jumpInstantly(id);
+    });
+  }, [leaves, jumpInstantly]);
 
   // Keep the URL on the current page, so reloading during development stays put.
+  // While a page from the URL is pending, leave the URL alone so it isn't lost.
   useEffect(() => {
-    if (!hashReady.current) return;
+    if (!hashReady.current || pendingId.current) return;
     const url = curId === leaves[0].id ? location.pathname : `#${curId}`;
     history.replaceState(null, "", url);
   }, [curId, leaves]);
