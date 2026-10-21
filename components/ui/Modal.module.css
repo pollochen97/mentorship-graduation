@@ -1,0 +1,75 @@
+/* The dialog is its own size container, so cqw inside it is relative to the modal, not the page. */
+.dialog {
+  width: min(92vw, 1100px);
+  max-height: 88vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  container-type: inline-size;
+}
+
+.dialog::backdrop {
+  background: rgba(17, 17, 17, 0.55);
+}
+
+.dialog[open] {
+  animation: pop 0.18s ease-out;
+}
+
+@keyframes pop {
+  from {
+    transform: translateY(1.5cqw) scale(0.97);
+    opacity: 0;
+  }
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  background: var(--tone);
+  color: var(--on-tone);
+  border: max(2px, 0.25cqw) solid var(--ink);
+  box-shadow: max(6px, 0.8cqw) max(6px, 0.8cqw) 0 var(--ink);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  padding: 2cqw 2.4cqw;
+  border-bottom: max(2px, 0.25cqw) solid var(--ink);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font: 700 clamp(18px, 3.4cqw, 40px) / 1.2 var(--f-display);
+}
+
+.close {
+  flex: none;
+  width: clamp(36px, 5cqw, 56px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font: 700 clamp(20px, 3.2cqw, 36px) / 1 var(--f-mono);
+  /* Set explicitly: on a dark tone the box's text colour is white and would hide the ×. */
+  color: var(--ink);
+  background: var(--white);
+  border: max(2px, 0.25cqw) solid var(--ink);
+  box-shadow: 0.4cqw 0.4cqw 0 var(--ink);
+  cursor: pointer;
+}
+
+.close:active {
+  transform: translate(0.3cqw, 0.3cqw);
+  box-shadow: 0.1cqw 0.1cqw 0 var(--ink);
+}
+
+.body {
+  padding: 2.4cqw;
+  overflow: auto;
+  font: 400 clamp(15px, 2cqw, 24px) / 1.7 var(--f-body);
+}
