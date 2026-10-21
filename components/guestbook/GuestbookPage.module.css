@@ -1,0 +1,8 @@
+/* Dot-grid paper (spec 4.1). */
+.board {
+  position: absolute;
+  inset: 0;
+  background-color: var(--paper);
+  background-image: radial-gradient(rgba(17, 17, 17, 0.16) 1px, transparent 1.3px);
+  background-size: 2.4cqw 2.4cqw;
+}

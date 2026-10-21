@@ -1,0 +1,23 @@
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--page-pad);
+}
+
+.title {
+  margin: 0;
+  font: var(--type-title);
+}
+
+.part {
+  color: var(--muted);
+}
+
+.body {
+  margin: 0;
+  font: var(--type-body);
+  color: var(--muted);
+}
