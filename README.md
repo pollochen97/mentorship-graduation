@@ -8,7 +8,7 @@
 
 ## 本機開發
 
-需要 Node.js 20.9 以上（建議 22）。
+需要 Node.js 22 以上（`@supabase/supabase-js` 的最低需求）。有裝 nvm 的話，執行 `nvm use` 就會切到 `.nvmrc` 指定的版本。
 
 ```bash
 npm install
