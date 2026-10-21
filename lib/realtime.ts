@@ -55,7 +55,7 @@ let client: SupabaseClient | null = null;
 function connect(): () => void {
   if (USE_MOCK) {
     setStatus("connected");
-    return startMockLive(dispatchLive);
+    return startMockLive(dispatchLive, setStatus);
   }
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

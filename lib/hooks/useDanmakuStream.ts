@@ -24,12 +24,15 @@ export function useDanmakuStream(
 
   useEffect(() => {
     let lastId = 0;
+    // Whether lastId is a real starting point: set by the first message, live or polled.
+    let primed = false;
     const seen = new Set<number>();
     const deliver = (danmaku: Danmaku) => {
       if (seen.has(danmaku.id)) return;
       seen.add(danmaku.id);
       if (seen.size > 500) seen.delete(seen.values().next().value!);
       lastId = Math.max(lastId, danmaku.id);
+      primed = true;
       callbacks.current.onMessage(danmaku);
     };
 
@@ -37,9 +40,14 @@ export function useDanmakuStream(
     const pollOnce = async () => {
       const r = await fetchDanmakuSince(lastId);
       if (!r.ok) return;
-      // Nothing received yet: start from the newest instead of replaying the backlog.
-      if (lastId === 0) lastId = Math.max(0, ...r.data.map((d) => d.id));
-      else r.data.forEach(deliver);
+      if (primed) {
+        r.data.forEach(deliver);
+        return;
+      }
+      // First poll with nothing received yet: skip the backlog and start after its newest message.
+      // An empty answer means there are no messages at all, so everything after it is new.
+      lastId = Math.max(lastId, ...r.data.map((d) => d.id));
+      primed = true;
     };
 
     const offNew = onLive("danmaku:new", deliver);

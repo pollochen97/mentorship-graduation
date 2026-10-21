@@ -80,7 +80,8 @@ export type Settings = z.infer<typeof Settings>;
 // GET  /api/notes?section=m1      → NotesResponse
 // POST /api/notes   (NoteInput)    → NoteResponse
 // POST /api/danmaku (DanmakuInput) → DanmakuResponse
-// GET  /api/danmaku?since=<id>     → DanmakuListResponse (newer than id, oldest first, at most 50)
+// GET  /api/danmaku?since=<id>     → DanmakuListResponse: newer than id, oldest first; if more than
+//                                    50 match, only the newest 50 (so since=0 gives the latest ones)
 // GET  /api/settings               → Settings
 
 export const NotesResponse = z.object({ notes: z.array(Note) });

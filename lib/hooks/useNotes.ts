@@ -29,6 +29,8 @@ export function useNotes(section: NoteSection) {
 
   useEffect(() => {
     let cancelled = false;
+    // Notes hidden by note:hide, so a slower initial load can't bring them back.
+    const hiddenIds = new Set<string>();
     // Updates only this section's state, starting over if the state still holds another section.
     const update = (fn: (s: State) => Partial<State>) =>
       setState((prev) => {
@@ -40,7 +42,10 @@ export function useNotes(section: NoteSection) {
       if (cancelled) return;
       update((s) =>
         r.ok
-          ? { notes: merge(r.data.sort(byTime), s.notes), loaded: true }
+          ? {
+              notes: merge(r.data.filter((n) => !hiddenIds.has(n.id)).sort(byTime), s.notes),
+              loaded: true,
+            }
           : { error: r.error, loaded: true },
       );
     });
@@ -49,6 +54,8 @@ export function useNotes(section: NoteSection) {
     });
     const offHide = onLive("note:hide", ({ note, hidden }) => {
       if (note.section !== section) return;
+      if (hidden) hiddenIds.add(note.id);
+      else hiddenIds.delete(note.id);
       update((s) => ({
         notes: hidden ? s.notes.filter((n) => n.id !== note.id) : merge(s.notes, [note]),
       }));

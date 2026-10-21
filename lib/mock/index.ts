@@ -5,6 +5,9 @@
 //   __mock.danmaku("你好")   a danmaku:new          __mock.remove(id)   a danmaku:remove
 //   __mock.note("m1")        a note:new             __mock.hide(id)     a note:hide
 //   __mock.pause() / resume()  settings:update     __mock.photo()      photo:final
+//   __mock.offline() / online()  Realtime drops / comes back; danmaku then only reach pollers
+//   __mock.list("m1")        ids of a guestbook's notes
+// Add ?mockLatency=1500 to the URL to make every mock request take 1.5 s (default 200 ms).
 import type { ApiResult } from "../api";
 import {
   ERROR_MESSAGES,
@@ -27,10 +30,18 @@ const DANMAKU_GAP_S = 5;
 const NOTE_GAP_S = 10;
 
 type Emit = (event: string, payload: unknown) => void;
+type SetStatus = (status: "connected" | "disconnected") => void;
 let emit: Emit | null = null;
+let setStatus: SetStatus | null = null;
+let online = true;
+/** Sends a live event, unless the fake connection is down. */
+const send: Emit = (event, payload) => {
+  if (online) emit?.(event, payload);
+};
 
 const pick = <T>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)];
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const latency = () => Number(new URLSearchParams(location.search).get("mockLatency")) || 200;
+const wait = () => new Promise((resolve) => setTimeout(resolve, latency()));
 const fail = (code: ErrorCode, retryAfter?: number): ApiResult<never> => ({
   ok: false,
   error: { code, message: ERROR_MESSAGES[code], ...(retryAfter !== undefined && { retryAfter }) },
@@ -41,6 +52,7 @@ const fail = (code: ErrorCode, retryAfter?: number): ApiResult<never> => ({
 let nextDanmakuId = 1000;
 const recentDanmaku: Danmaku[] = [];
 let notes: Note[] | null = null;
+const hiddenNotes = new Set<string>();
 const settings: Settings = { danmakuEnabled: true, finalPhotoUrl: null };
 let lastDanmakuAt = 0;
 let lastNoteAt = 0;
@@ -84,13 +96,15 @@ function secondsLeft(last: number, gap: number) {
 // ---- API ----
 
 export const mockApi = {
+  // Reads take their snapshot before the delay, like a server answering a request made earlier.
   async fetchNotes(section: NoteSection): Promise<ApiResult<Note[]>> {
-    await wait(200);
-    return { ok: true, data: allNotes().filter((n) => n.section === section) };
+    const data = allNotes().filter((n) => n.section === section && !hiddenNotes.has(n.id));
+    await wait();
+    return { ok: true, data };
   },
 
   async sendNote(input: NoteInput): Promise<ApiResult<Note>> {
-    await wait(300);
+    await wait();
     if (blocked(input.body)) return fail("forbidden_content");
     const left = secondsLeft(lastNoteAt, NOTE_GAP_S);
     if (left > 0) return fail("rate_limited", left);
@@ -102,30 +116,32 @@ export const mockApi = {
       color: input.color,
     };
     allNotes().push(note);
-    emit?.("note:new", note);
+    send("note:new", note);
     return { ok: true, data: note };
   },
 
   async sendDanmaku(input: DanmakuInput): Promise<ApiResult<Danmaku>> {
-    await wait(300);
+    await wait();
     if (!settings.danmakuEnabled) return fail("danmaku_paused");
     if (blocked(input.body)) return fail("forbidden_content");
     const left = secondsLeft(lastDanmakuAt, DANMAKU_GAP_S);
     if (left > 0) return fail("rate_limited", left);
     lastDanmakuAt = Date.now();
     const danmaku = makeDanmaku(input.name, input.body);
-    emit?.("danmaku:new", danmaku);
+    send("danmaku:new", danmaku);
     return { ok: true, data: danmaku };
   },
 
   async fetchDanmakuSince(since: number): Promise<ApiResult<Danmaku[]>> {
-    await wait(200);
-    return { ok: true, data: recentDanmaku.filter((d) => d.id > since) };
+    const data = recentDanmaku.filter((d) => d.id > since);
+    await wait();
+    return { ok: true, data };
   },
 
   async fetchSettings(): Promise<ApiResult<Settings>> {
-    await wait(200);
-    return { ok: true, data: { ...settings } };
+    const data = { ...settings };
+    await wait();
+    return { ok: true, data };
   },
 };
 
@@ -133,37 +149,55 @@ export const mockApi = {
 
 const controls = {
   danmaku(body = pick(MOCK_DANMAKU), name = pick(MOCK_NAMES)) {
-    emit?.("danmaku:new", makeDanmaku(name, body));
+    send("danmaku:new", makeDanmaku(name, body));
   },
   remove(id: number) {
-    emit?.("danmaku:remove", { id });
+    send("danmaku:remove", { id });
   },
   note(section: NoteSection = "m1") {
     const note = makeNote(section, Math.floor(Math.random() * 100));
     allNotes().push(note);
-    emit?.("note:new", note);
+    send("note:new", note);
   },
   hide(id: string, hidden = true) {
     const note = allNotes().find((n) => n.id === id);
-    if (note) emit?.("note:hide", { note, hidden });
+    if (!note) return;
+    if (hidden) hiddenNotes.add(id);
+    else hiddenNotes.delete(id);
+    send("note:hide", { note, hidden });
   },
   pause() {
     settings.danmakuEnabled = false;
-    emit?.("settings:update", { ...settings });
+    send("settings:update", { ...settings });
   },
   resume() {
     settings.danmakuEnabled = true;
-    emit?.("settings:update", { ...settings });
+    send("settings:update", { ...settings });
+  },
+  offline() {
+    online = false;
+    setStatus?.("disconnected");
+  },
+  online() {
+    online = true;
+    setStatus?.("connected");
+  },
+  list(section: NoteSection = "m1") {
+    return allNotes()
+      .filter((n) => n.section === section)
+      .map((n) => n.id);
   },
   photo(url = `${location.origin}/mock/final-photo.jpg`) {
     settings.finalPhotoUrl = url;
-    emit?.("photo:final", { url });
+    send("photo:final", { url });
   },
 };
 
 /** Starts fake live events; called by lib/realtime when the first listener subscribes. */
-export function startMockLive(dispatch: Emit) {
+export function startMockLive(dispatch: Emit, status: SetStatus) {
   emit = dispatch;
+  setStatus = status;
+  online = true;
   (window as unknown as { __mock: typeof controls }).__mock = controls;
   const timer = window.setInterval(() => {
     if (settings.danmakuEnabled) controls.danmaku();
@@ -171,5 +205,6 @@ export function startMockLive(dispatch: Emit) {
   return () => {
     window.clearInterval(timer);
     emit = null;
+    setStatus = null;
   };
 }
