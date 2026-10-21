@@ -2,7 +2,7 @@
 
 11/07 Sat. 結業發表活動網站：一本可以翻頁的航海日誌，在現場投影。來賓用手機掃 QR code 就能發彈幕。
 
-- 需求規格書（共用文件）：https://claude.ai/artifact/29Cmfe3Axhm7beQbgJYzro
+- 需求規格書：[`docs/spec.md`](docs/spec.md)
 - 視覺與互動參考：[`docs/flipbook-demo.html`](docs/flipbook-demo.html)（直接用瀏覽器開啟）
 - 技術：Next.js（App Router）· Vercel · Supabase（Postgres / Realtime Broadcast / Storage）
 
