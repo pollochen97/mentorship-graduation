@@ -1,0 +1,101 @@
+/* Projection mode: one 16:9 page fills the screen, ring-bound along the top. Thin margins; the top
+   leaves room for the half of each ring that sticks out, right and bottom for the book's shadow. */
+.stage {
+  --gap: clamp(6px, 1vw, 16px);
+  --ring-out: min(2vw, 17px);
+  --book-shadow: 8px;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--gap) + var(--ring-out))
+    calc(var(--gap) + var(--book-shadow) + env(safe-area-inset-right, 0px))
+    calc(var(--gap) + var(--book-shadow)) calc(var(--gap) + env(safe-area-inset-left, 0px));
+}
+
+.book {
+  position: relative;
+  width: min(100%, calc((100svh - 2 * var(--gap) - var(--ring-out) - var(--book-shadow)) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  perspective: 2400px;
+  touch-action: pan-x pinch-zoom;
+  user-select: none;
+  container-type: inline-size;
+}
+
+.book::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: translate(var(--book-shadow), var(--book-shadow));
+}
+
+.book:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 10px;
+}
+
+/* A leaf flips up around its top edge. Opacity switches at the end of the flip (step-end), so the
+   back of a flipped leaf never shows; coming back it reappears at once (0s). */
+.leaf {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 0;
+  transition:
+    transform 0.8s cubic-bezier(0.4, 0.1, 0.25, 1),
+    opacity 0s;
+}
+
+.flipped {
+  transform: rotateX(100deg);
+  opacity: 0;
+  transition:
+    transform 0.8s cubic-bezier(0.4, 0.1, 0.25, 1),
+    opacity 0.8s step-end;
+}
+
+.instant .leaf {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaf {
+    transition-delay: 0s !important;
+  }
+}
+
+/* Each page is a size container, so cqw inside it means 1% of the page width. */
+.face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  backface-visibility: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--line);
+}
+
+.rings {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 0;
+  height: 0;
+  display: flex;
+  justify-content: space-between;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.rings i {
+  width: 1%;
+  min-width: 6px;
+  height: 4cqw;
+  min-height: 14px;
+  transform: translateY(-50%);
+  background: var(--white);
+  border: var(--line);
+}

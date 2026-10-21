@@ -1,0 +1,75 @@
+/* Sized in px, not cqw: it sits outside the book and should stay the same size on any screen. */
+.toolbar {
+  position: fixed;
+  z-index: 200;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: max(12px, env(safe-area-inset-left, 0px) + 12px);
+  right: max(12px, env(safe-area-inset-right, 0px) + 12px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.toolbar > * {
+  pointer-events: auto;
+}
+
+.idle {
+  opacity: 0;
+}
+
+.idle > * {
+  pointer-events: none;
+}
+
+/* Touch screens have no hover to wake it, so keep it visible. */
+@media (hover: none) {
+  .idle {
+    opacity: 1;
+  }
+
+  .idle > * {
+    pointer-events: auto;
+  }
+}
+
+.toolbar select,
+.toolbar button,
+.counter {
+  font: 700 13px var(--f-body);
+  color: var(--ink);
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: 6px 10px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.toolbar button {
+  cursor: pointer;
+}
+
+.toolbar button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.toolbar button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.counter {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tip {
+  font: 500 12px var(--f-body);
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px solid var(--ink);
+  padding: 5px 9px;
+}
