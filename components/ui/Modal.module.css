@@ -55,6 +55,8 @@
   display: grid;
   place-items: center;
   font: 700 clamp(20px, 3.2cqw, 36px) / 1 var(--f-mono);
+  /* Set explicitly: on a dark tone the box's text colour is white and would hide the ×. */
+  color: var(--ink);
   background: var(--white);
   border: max(2px, 0.25cqw) solid var(--ink);
   box-shadow: 0.4cqw 0.4cqw 0 var(--ink);
