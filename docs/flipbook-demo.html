@@ -1,0 +1,726 @@
+<title>四個月航海日誌</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: projection mode. One landscape page fills the screen, ring-bound along the top;
+   wheel / arrows / clicker flip pages. A toolbar floats top-left and hides when idle.
+   Deliberately a single light neo-brutalist look: every colour is set explicitly. */
+:root {
+  color-scheme: light;
+  --ink: #111111;
+  --panel: #fdf5e2;
+  --white: #ffffff;
+  --muted: #4b4a46;
+  --yellow: #f5c13f;
+  --mint: #a9d8b8;
+  --pink: #f4c4f6;
+  --blue: #9ccbf2;
+  --band-1: #5aaef0; --band-2: #f7d2b0; --band-3: #ff9b72; --band-4: #f9b9cc;
+  --shadow: 4px 4px 0 var(--ink);
+  --f-display: "IBM Plex Mono", "Noto Sans TC", ui-monospace, monospace;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+[hidden] { display: none !important; }   /* the sheet, tip and uploader set display themselves */
+html, body { height: 100%; }
+body {
+  color: var(--ink); font-family: var(--f-body); overflow: hidden;
+  background: linear-gradient(118deg, var(--band-1) 0 24%, var(--band-2) 24% 48%, var(--band-3) 48% 72%, var(--band-4) 72%) fixed;
+  /* 16:9 projection: thin margins. Top leaves room for the half of each ring that sticks out;
+     right and bottom leave room for the book's 8px shadow. The toolbar floats over the page and hides when idle. */
+  --gap: clamp(6px, 1vw, 16px);
+  --ring-out: min(2vw, 17px);
+  padding: calc(var(--gap) + var(--ring-out)) calc(var(--gap) + 8px + env(safe-area-inset-right, 0px))
+           calc(var(--gap) + 8px) calc(var(--gap) + env(safe-area-inset-left, 0px));
+  display: grid; place-items: center;
+}
+
+/* ---- the book: fits the screen ---- */
+.book {
+  position: relative;
+  width: min(100%, calc((100svh - 2 * var(--gap) - var(--ring-out) - 8px) * 16 / 9));
+  aspect-ratio: 16 / 9; max-width: 100%;
+  perspective: 2400px; touch-action: pan-x pinch-zoom; user-select: none;
+  container-type: inline-size;
+}
+.book::before { content: ""; position: absolute; inset: 0; background: var(--ink); transform: translate(8px, 8px); }
+.book:focus-visible { outline: 3px solid var(--ink); outline-offset: 10px; }
+.leaf { position: absolute; inset: 0; transform-origin: 50% 0;
+  transition: transform .8s cubic-bezier(.4, .1, .25, 1), opacity .8s step-end; }
+.leaf.flipped { transform: rotateX(100deg); opacity: 0; transition: transform .8s cubic-bezier(.4, .1, .25, 1), opacity .8s step-end; }
+.leaf:not(.flipped) { opacity: 1; transition: transform .8s cubic-bezier(.4, .1, .25, 1), opacity 0s; }
+.face {
+  position: absolute; inset: 0; overflow: hidden; container-type: inline-size;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--panel); color: var(--ink); border: 2px solid var(--ink);
+}
+.rings { position: absolute; left: 6%; right: 6%; top: 0; height: 0; display: flex; justify-content: space-between; z-index: 90; pointer-events: none; }
+.rings i { width: 1%; min-width: 6px; height: 4cqw; max-height: 34px; min-height: 14px; transform: translateY(-50%);
+  background: var(--white); border: 2px solid var(--ink); }
+
+/* ---- page content (sized to the page with container units) ---- */
+.pi { position: absolute; inset: 0; display: flex; gap: 3cqw; padding: 4.4cqw 3.6cqw 3.2cqw; }
+.col { display: flex; flex-direction: column; gap: 1.4cqw; min-width: 0; }
+.side { flex: 0 0 32%; }
+.main { flex: 1; min-width: 0; }
+.month-label { align-self: flex-start; font: 700 clamp(8px, 1.3cqw, 13px) var(--f-mono); letter-spacing: .1em;
+  background: var(--accent, var(--yellow)); border: 2px solid var(--ink); padding: .4cqw 1.1cqw; }
+.month-title { font: 700 clamp(17px, 4.4cqw, 52px)/1.12 var(--f-display); margin: 0; text-wrap: balance; }
+.date { font: 700 clamp(8px, 1.4cqw, 15px) var(--f-mono); color: var(--muted); }
+.hand { font: 400 clamp(9px, 1.65cqw, 20px)/1.7 var(--f-body); margin: 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 1cqw; margin-top: auto; font: 500 clamp(7px, 1.2cqw, 13px) var(--f-body); }
+.stats span { flex: 1 1 auto; display: flex; flex-direction: column; gap: .2cqw; padding: .8cqw 1cqw; background: var(--accent); border: 2px solid var(--ink); }
+.stats b { font: 700 clamp(11px, 2.4cqw, 28px) var(--f-display); }
+
+.ph { background: #ccc center/cover no-repeat; position: relative; min-height: 0; border: 2px solid var(--ink); }
+.photos { display: grid; gap: 1.2cqw; min-height: 0; }
+.photos.hero { grid-template: 1fr / 1fr; }
+.photos.grid2 { grid-template: 1fr / 1fr 1fr; }
+.photos.grid3 { grid-template: 1fr 1fr / repeat(3, 1fr); }
+.photos.mosaic { grid-template: 1fr 1fr / 1.3fr 1fr; }
+.photos.mosaic .ph:first-child { grid-row: span 2; }
+
+.cover { background: var(--yellow); }
+.cover .kicker { font: 700 clamp(8px, 1.5cqw, 15px) var(--f-mono); letter-spacing: .14em; align-self: flex-start; background: var(--ink); color: var(--yellow); padding: .5cqw 1.2cqw; }
+.cover h2 { font: 700 clamp(22px, 6.4cqw, 76px)/1.08 var(--f-display); margin: 0; }
+.cover .stamp { align-self: flex-start; margin-top: auto; border: 2px solid var(--ink); background: var(--white); padding: .9cqw 1.6cqw; font: 700 clamp(8px, 1.4cqw, 15px) var(--f-mono); box-shadow: var(--shadow); }
+.cover .ph { box-shadow: 6px 6px 0 var(--ink); }
+
+.crew { display: grid; grid-template: 1fr 1fr / repeat(3, 1fr); gap: 1.6cqw; }
+.crew-card { background: var(--white); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 1.4cqw; display: grid; grid-template-columns: auto 1fr; gap: .4cqw 1.4cqw; align-content: center; min-width: 0; }
+.crew-card .av { grid-row: span 3; width: 6.4cqw; aspect-ratio: 1; border: 2px solid var(--ink); background: var(--c); display: grid; place-items: center; font: 700 clamp(12px, 2.8cqw, 32px) var(--f-body); }
+.crew-card .role { font: 700 clamp(7px, 1.15cqw, 13px) var(--f-mono); letter-spacing: .08em; }
+.crew-card .nm { font: 700 clamp(10px, 2cqw, 24px) var(--f-body); }
+.crew-card .ln { font-size: clamp(7px, 1.2cqw, 14px); color: var(--muted); }
+.sailors { display: grid; grid-template: 1fr 1fr / repeat(6, 1fr); gap: 1.2cqw; }
+.sailor { background: var(--white); border: 2px solid var(--ink); display: flex; flex-direction: column; min-height: 0; }
+.sailor .ph { flex: 1; border: 0; border-bottom: 2px solid var(--ink); }
+.sailor span { font: 700 clamp(7px, 1.2cqw, 13px) var(--f-mono); padding: .5cqw .8cqw; }
+
+/* ---- guestbook pages ---- */
+.board-face { background-color: var(--panel); background-image: radial-gradient(rgba(17,17,17,.16) 1px, transparent 1.3px); background-size: 2.4cqw 2.4cqw; }
+.board { flex-direction: column; gap: 1.6cqw; }
+.board-head { display: flex; align-items: center; gap: 1.6cqw; }
+.board-head .month-title { font-size: clamp(14px, 3cqw, 36px); }
+.board-count { margin-left: auto; font: 700 clamp(8px, 1.3cqw, 14px) var(--f-mono); }
+.slots { flex: 1; min-height: 0; display: grid; grid-template: repeat(2, 1fr) / repeat(5, 1fr); gap: 1.8cqw; }
+.slot { position: relative; min-width: 0; min-height: 0; }
+.slot:empty { border: 2px dashed rgba(17,17,17,.14); }
+.note { position: absolute; inset: 0; background: var(--nc); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);
+  padding: 1.1cqw 1.2cqw; display: flex; flex-direction: column; gap: .6cqw; transform: rotate(var(--r)); }
+.note p { margin: 0; font: 500 clamp(8px, 1.5cqw, 18px)/1.5 var(--f-body); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.note .by { margin-top: auto; font: 700 clamp(7px, 1.05cqw, 12px) var(--f-mono); }
+.note.flying { z-index: 20; }
+.corner { position: relative; min-width: 0; min-height: 0; }
+.cont { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font: 700 clamp(8px, 1.3cqw, 14px) var(--f-mono); border: 2px solid var(--ink); background: var(--white); }
+.pad { position: absolute; inset: 0; background: var(--nc); border: 2px solid var(--ink); display: flex; flex-direction: column; gap: .6cqw; padding: 1cqw;
+  box-shadow: 3px 3px 0 var(--ink), 7px 7px 0 -2px var(--white), 7px 7px 0 0 var(--ink); }
+.pad textarea { flex: 1; min-height: 0; resize: none; border: 0; background: transparent; font: 500 clamp(8px, 1.45cqw, 17px)/1.45 var(--f-body); color: var(--ink); padding: 0; }
+.pad textarea:focus { outline: none; }
+.pad textarea::placeholder { color: rgba(17,17,17,.5); }
+.pad-row { display: flex; align-items: center; justify-content: space-between; gap: .6cqw; }
+.pad-n { font: 700 clamp(7px, 1cqw, 11px) var(--f-mono); }
+.pad button, .pad-open { font: 700 clamp(8px, 1.15cqw, 13px) var(--f-body); background: var(--ink); color: var(--white); border: 0; padding: .5cqw 1cqw; cursor: pointer; }
+.pad button:disabled { opacity: .4; cursor: not-allowed; }
+.pad-open { display: none; position: absolute; inset: 0; width: 100%; background: transparent; color: var(--ink); }
+@container (max-width: 560px) { .pad textarea, .pad-row { display: none; } .pad-open { display: block; } }
+
+/* ---- final photo page ---- */
+.final-frame { background: var(--white); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); display: flex; flex-direction: column; margin: 0; }
+.final-photo { flex: 1; min-height: 0; position: relative; border-bottom: 2px solid var(--ink); background: #e9e4d6; overflow: hidden; }
+.final-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; max-width: none; }
+.final-photo img.develop { animation: develop 3.2s ease-out both; }
+@keyframes develop { from { filter: brightness(2.6) saturate(0) blur(6px); opacity: .2; } 40% { opacity: 1; } to { filter: none; opacity: 1; } }
+.final-empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font: 700 clamp(9px, 1.6cqw, 18px) var(--f-mono); color: var(--muted); padding: 2cqw; }
+.final-frame figcaption { font: 700 clamp(8px, 1.4cqw, 15px) var(--f-mono); padding: 1cqw 1.4cqw; }
+.upbtn { align-self: flex-start; display: inline-block; font: 700 clamp(11px, 1.6cqw, 17px) var(--f-body); background: var(--ink); color: var(--white); border: 2px solid var(--ink); padding: 1cqw 1.8cqw; box-shadow: 3px 3px 0 var(--band-3); cursor: pointer; min-height: 32px; }
+.upbtn.off { background: var(--white); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+.up-status { margin: 0; font: 500 clamp(8px, 1.3cqw, 14px) var(--f-body); color: var(--muted); }
+
+/* ---- floating toolbar ---- */
+.toolbar { position: fixed; z-index: 200; top: calc(env(safe-area-inset-top, 0px) + 10px); left: max(12px, env(safe-area-inset-left, 0px) + 12px);
+  right: max(12px, env(safe-area-inset-right, 0px) + 12px); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; pointer-events: none;
+  transition: opacity .3s; }
+.toolbar > * { pointer-events: auto; }
+.toolbar.idle { opacity: 0; }
+.toolbar.idle > * { pointer-events: none; }
+@media (hover: none) { .toolbar.idle { opacity: 1; } .toolbar.idle > * { pointer-events: auto; } }
+.toolbar select, .toolbar input, .toolbar button, .counter { font: 700 13px var(--f-body); color: var(--ink); background: var(--white); border: 2px solid var(--ink); border-radius: 0; padding: 6px 10px; box-shadow: 3px 3px 0 var(--ink); }
+.toolbar button { cursor: pointer; }
+.toolbar button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.toolbar button[aria-pressed="true"] { background: var(--ink); color: var(--white); }
+.toolbar :focus-visible { outline: 3px solid var(--band-1); outline-offset: 2px; }
+.counter { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.dm-form { display: flex; gap: 0; }
+.dm-form input { width: 12em; min-width: 0; box-shadow: none; }
+.dm-form button { margin-left: -2px; }
+.tip { font: 500 12px var(--f-body); color: var(--ink); background: rgba(255,255,255,.75); border: 2px solid var(--ink); padding: 5px 9px; }
+
+/* danmaku */
+.danmaku { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 150; }
+.bullet { position: absolute; left: 0; white-space: nowrap; font: 500 clamp(14px, 1.5vw, 26px) var(--f-body); color: var(--ink);
+  background: var(--white); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 3px 12px; will-change: transform; }
+.bullet.mine { background: var(--yellow); }
+
+/* bottom sheet for writing a note on a phone */
+.sheet { position: fixed; z-index: 300; left: 0; right: 0; bottom: 0; background: var(--yellow); border-top: 2px solid var(--ink);
+  padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 10px; }
+.sheet p { margin: 0; font: 700 14px var(--f-mono); }
+.sheet textarea { font: 16px var(--f-body); border: 2px solid var(--ink); padding: 10px; min-height: 90px; resize: vertical; background: var(--white); color: var(--ink); }
+.sheet div { display: flex; gap: 10px; justify-content: flex-end; }
+.sheet button { font: 700 14px var(--f-body); border: 2px solid var(--ink); background: var(--white); padding: 8px 16px; box-shadow: 3px 3px 0 var(--ink); color: var(--ink); }
+.sheet button[type="submit"] { background: var(--ink); color: var(--white); }
+@media (prefers-reduced-motion: reduce) { .leaf { transition-duration: .01s !important; } .final-photo img.develop { animation: none; } }
+</style>
+
+<div class="toolbar" id="toolbar">
+  <select id="jump" aria-label="跳到章節"></select>
+  <span class="counter" id="counter" aria-live="polite">1 / 1</span>
+  <button id="dm-toggle" type="button" aria-pressed="true">彈幕</button>
+  <form class="dm-form" id="dm-form" autocomplete="off">
+    <input id="dm-text" maxlength="30" placeholder="發一則彈幕…" aria-label="彈幕內容">
+    <button type="submit">送出</button>
+  </form>
+  <button id="fs" type="button">全螢幕</button>
+  <span class="tip" id="tip">滾輪、↑↓ 或簡報筆翻頁 · D 開關彈幕 · F 全螢幕</span>
+</div>
+
+<div class="book" id="book" tabindex="0" aria-label="活動手帳，用滾輪或上下鍵翻頁">
+  <div class="rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+</div>
+<!-- danmaku sits above the whole screen, so turning pages never cuts it off -->
+<div class="danmaku" id="danmaku" aria-hidden="true"></div>
+
+<form class="sheet" id="sheet" hidden autocomplete="off">
+  <p id="sheet-title">寫便條</p>
+  <textarea id="sheet-text" maxlength="60" placeholder="寫下你的留言（60 字內）" aria-label="便條內容"></textarea>
+  <div><button type="button" id="sheet-cancel">取消</button><button type="submit">貼上</button></div>
+</form>
+
+<!-- fixed pages; section pages and guestbook pages are generated from SECTIONS below -->
+<div id="pages" hidden>
+  <div class="page cover" data-key="cover"><div class="pi">
+    <div class="col side">
+      <span class="kicker">LOGBOOK · VOYAGE 2026</span>
+      <h2>我們的<br>四個月<br>航程</h2>
+      <span class="stamp">JUN — OCT · 24 位水手</span>
+    </div>
+    <div class="ph main" data-scene="sea" data-pal="aug" data-seed="11"></div>
+  </div></div>
+
+  <div class="page" data-key="staff"><div class="pi" style="--accent: var(--mint)">
+    <div class="col side">
+      <span class="month-label">02 · CREW</span>
+      <h3 class="month-title">工作人員介紹</h3>
+      <p class="hand">讓這艘船開得動的六個人。從報名表到最後一次合照，所有細節都經過他們的手。</p>
+    </div>
+    <div class="crew main" id="crew"></div>
+  </div></div>
+
+  <div class="page" data-key="sailors"><div class="pi" style="--accent: var(--blue)">
+    <div class="col" style="flex: 0 0 24%">
+      <span class="month-label">03 · SAILORS</span>
+      <h3 class="month-title">水手介紹</h3>
+      <p class="hand">這一屆共 24 位水手。這裡先放 12 位示意，正式版會接續排滿。</p>
+    </div>
+    <div class="sailors main" id="sailors"></div>
+  </div></div>
+
+  <div class="page" data-key="final"><div class="pi" style="--accent: var(--pink)">
+    <div class="col side">
+      <span class="month-label">11 · FINALE</span>
+      <h3 class="month-title">最後的大合照</h3>
+      <span class="date">2026.10.18</span>
+      <p class="hand">四個月的最後一天，全體水手和工作人員站在一起。這張照片會在現場拍下，直接出現在這一頁。</p>
+      <div class="uploader" id="uploader">
+        <label class="upbtn" for="photo-input">用手機拍照上傳</label>
+        <input id="photo-input" type="file" accept="image/*" capture="environment" hidden>
+      </div>
+      <p class="up-status" id="up-status"></p>
+    </div>
+    <figure class="final-frame main">
+      <div class="final-photo" id="final-photo"><div class="final-empty">等待合照上傳中…</div></div>
+      <figcaption>VOYAGE 2026 · ALL HANDS</figcaption>
+    </figure>
+  </div></div>
+</div>
+
+<script>
+// ---- content data (in the real site this lives in a JSON / MDX file) ----
+const SECTIONS = [
+  { key: "audition", no: "04", label: "AUDITION", title: "海選", date: "2026.06.14 — 06.15", pal: "jul", c: "var(--yellow)", layout: "hero",
+    text: "一百多位報名者、兩天面試。每個人都帶著自己的故事來，最後只能選出 24 位水手。",
+    stats: [["112", "報名人數"], ["24", "錄取水手"], ["2", "天面試"]] },
+  { key: "welcome", no: "05", label: "WELCOME", title: "相見歡", date: "2026.07.05", pal: "aug", c: "var(--pink)", layout: "grid2",
+    text: "第一次見面，名牌比臉還大。破冰遊戲玩到一半，大家已經開始互相取綽號。" },
+  { key: "m1", no: "06", label: "MEETING 01", title: "第一次月會", date: "2026.07.26", pal: "aug", c: "var(--blue)", layout: "grid3",
+    text: "分組、定目標、認識彼此的專長。白板寫滿了，便利貼也用完了兩包。" },
+  { key: "m2", no: "07", label: "MEETING 02", title: "第二次月會", date: "2026.08.23", pal: "sep", c: "var(--mint)", layout: "mosaic",
+    text: "第一次期中分享，有人準備了十頁簡報，有人只帶了一張照片，兩種都很好。" },
+  { key: "m3", no: "08", label: "MEETING 03", title: "第三次月會", date: "2026.09.20", pal: "sep", c: "var(--yellow)", layout: "hero",
+    text: "移到戶外開會，風很大，講義一直飛走。結論是下次要帶夾子。" },
+  { key: "m4", no: "09", label: "MEETING 04", title: "第四次月會", date: "2026.10.11", pal: "oct", c: "var(--pink)", layout: "grid3",
+    text: "最後一次月會，各組成果發表。準備時間最長、笑聲也最多的一次。" },
+  { key: "meetups", no: "10", label: "MEETUPS", title: "各種小聚", date: "2026.07 — 10", pal: "jul", c: "var(--blue)", layout: "mosaic",
+    text: "宵夜、桌遊、颱風天的線上聊天。月會之外，這些才是大家真正變熟的時候。" },
+];
+const CREW = [
+  ["船長", "阿哲", "總召，負責把所有人帶回港", "var(--yellow)"], ["大副", "小薰", "流程與時程，什麼都記得", "var(--pink)"],
+  ["航海士", "柏宇", "活動設計，點子永遠用不完", "var(--blue)"], ["水手長", "小芸", "水手關懷，大家的樹洞", "var(--mint)"],
+  ["攝影", "阿傑", "這本日誌九成照片出自他", "var(--yellow)"], ["後勤", "佳佳", "場地、餐點、雨備都靠她", "var(--pink)"],
+];
+const PER = 9;   // notes per guestbook page (bottom-right cell holds the pad)
+const NOTE_COLORS = ["var(--yellow)", "var(--pink)", "var(--mint)", "var(--blue)"];
+
+// ---- placeholder photos: small procedural scenes so the demo needs no image hosting ----
+const PALETTES = {
+  jul: { sky: ["#f6c27a", "#f7e3b5"], sun: "#fff4d6", land: ["#c9643a", "#9c4a2c", "#5e2f22"] },
+  aug: { sky: ["#7cc3dd", "#d8f0f4"], sun: "#ffffff", land: ["#3b8db0", "#24607d", "#123d52"] },
+  sep: { sky: ["#f2d58a", "#fbf0cc"], sun: "#fff8e0", land: ["#d6b44a", "#a8862a", "#6b5a1c"] },
+  oct: { sky: ["#c27a8f", "#f3c39a"], sun: "#ffe2b8", land: ["#7d4563", "#583049", "#2e1b2b"] },
+};
+function rng(seed) { let s = seed * 9301 + 49297; return () => ((s = (s * 9301 + 49297) % 233280) / 233280); }
+function paint(scene, pal, seed) {
+  const c = document.createElement("canvas"); c.width = 640; c.height = 480;
+  const g = c.getContext("2d"), r = rng(seed), p = PALETTES[pal];
+  const sky = g.createLinearGradient(0, 0, 0, 480); sky.addColorStop(0, p.sky[0]); sky.addColorStop(1, p.sky[1]);
+  g.fillStyle = sky; g.fillRect(0, 0, 640, 480);
+  g.fillStyle = p.sun; g.globalAlpha = .9; g.beginPath(); g.arc(120 + r() * 400, 90 + r() * 90, 30 + r() * 30, 0, 7); g.fill(); g.globalAlpha = 1;
+  p.land.forEach((col, i) => {
+    const base = 230 + i * 80 + r() * 30; g.fillStyle = col; g.beginPath(); g.moveTo(0, 480);
+    if (scene === "sea" && i === 0) { g.lineTo(0, base); g.lineTo(640, base); }
+    else if (scene === "city" && i < 2) { let x = 0; while (x < 640) { const w = 30 + r() * 60, h = base - r() * (120 - i * 40); g.lineTo(x, h); g.lineTo(x + w, h); x += w; } }
+    else if (scene === "forest" && i === 1) { for (let x = 0; x <= 660; x += 22) { g.lineTo(x, base - 10 - r() * 40); g.lineTo(x + 11, base + 10); } }
+    else { for (let x = 0; x <= 640; x += 40) g.lineTo(x, base - Math.sin(x / 90 + seed + i) * (40 - i * 8) - r() * 12); }
+    g.lineTo(640, 480); g.closePath(); g.fill();
+  });
+  const img = g.getImageData(0, 0, 640, 480), d = img.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (r() - .5) * 18; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  g.putImageData(img, 0, 0);
+  return c.toDataURL("image/jpeg", .8);
+}
+const SCENES = ["sea", "hills", "city", "forest"];
+
+// ---- build the fixed and generated pages ----
+const pageSrc = new Map();
+document.getElementById("crew").append(...CREW.map(([role, name, line, c]) => {
+  const card = document.createElement("div"); card.className = "crew-card"; card.style.setProperty("--c", c);
+  card.innerHTML = `<span class="av"></span><span class="role"></span><span class="nm"></span><span class="ln"></span>`;
+  card.querySelector(".av").textContent = name[0]; card.querySelector(".role").textContent = role;
+  card.querySelector(".nm").textContent = name; card.querySelector(".ln").textContent = line;
+  return card;
+}));
+document.getElementById("sailors").append(...Array.from({ length: 12 }, (_, i) => {
+  const t = document.createElement("div"); t.className = "sailor";
+  t.innerHTML = `<div class="ph" data-scene="${SCENES[i % 4]}" data-pal="${["jul", "aug", "sep", "oct"][i % 4]}" data-seed="${70 + i}"></div><span>No.${String(i + 1).padStart(2, "0")}</span>`;
+  return t;
+}));
+const PHOTO_COUNT = { hero: 1, grid2: 2, grid3: 6, mosaic: 3 };
+SECTIONS.forEach((s, si) => {
+  const page = document.createElement("div"); page.className = "page"; page.dataset.key = s.key;
+  const photos = Array.from({ length: PHOTO_COUNT[s.layout] }, (_, i) =>
+    `<div class="ph" data-scene="${SCENES[(si + i) % 4]}" data-pal="${s.pal}" data-seed="${100 + si * 10 + i}"></div>`).join("");
+  const stats = s.stats ? `<div class="stats">${s.stats.map(([n, l]) => `<span><b>${n}</b>${l}</span>`).join("")}</div>` : "";
+  page.innerHTML = `<div class="pi" style="--accent:${s.c}"><div class="col side">
+    <span class="month-label">${s.no} · ${s.label}</span><h3 class="month-title">${s.title}</h3>
+    <span class="date">${s.date}</span><p class="hand">${s.text}</p>${stats}</div>
+    <div class="photos main ${s.layout}">${photos}</div></div>`;
+  document.getElementById("pages").append(page);
+});
+document.querySelectorAll(".ph[data-scene]").forEach(el => {
+  el.style.backgroundImage = `url(${paint(el.dataset.scene, el.dataset.pal, +el.dataset.seed)})`;
+});
+document.querySelectorAll("#pages > .page").forEach(p => pageSrc.set(p.dataset.key, p));
+
+function makeBoardPage(sec, i) {
+  const s = SECTIONS.find(x => x.key === sec);
+  const page = document.createElement("div"); page.className = "page board-face";
+  page.innerHTML = `<div class="pi board" style="--accent:${s.c}">
+    <div class="board-head"><span class="month-label">GUESTBOOK</span><h3 class="month-title"></h3><span class="board-count"></span></div>
+    <div class="slots">${'<div class="slot"></div>'.repeat(PER)}<div class="corner"></div></div></div>`;
+  page.querySelector(".month-title").textContent = `留言板 · ${s.title}`;
+  return page;
+}
+
+// ---- page order: fixed pages + each section followed by as many guestbook pages as its notes need ----
+const bookEl = document.getElementById("book");
+const leafByKey = new Map();
+let notesBySection = {}, allNotes = [];
+let order = [], leaves = [], cur = 0;
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function boardPages(sec) { return Math.max(1, Math.ceil(((notesBySection[sec] || []).length + 1) / PER)); }
+function computeOrder() {
+  const o = ["cover", "staff", "sailors"];
+  SECTIONS.forEach(s => { o.push(s.key); for (let i = 0; i < boardPages(s.key); i++) o.push(`board:${s.key}:${i}`); });
+  o.push("final");
+  return o;
+}
+function getLeaf(key) {
+  if (leafByKey.has(key)) return leafByKey.get(key);
+  const [kind, sec, i] = key.split(":");
+  const page = kind === "board" ? makeBoardPage(sec, +i) : pageSrc.get(key);
+  page.classList.add("face");
+  const leaf = document.createElement("div"); leaf.className = "leaf"; leaf.dataset.key = key; leaf.append(page);
+  leafByKey.set(key, leaf);
+  return leaf;
+}
+function rebuild() {
+  const curKey = order[cur];
+  order = computeOrder();
+  leaves = order.map(getLeaf);
+  const rings = bookEl.querySelector(".rings");
+  for (let i = leaves.length - 1; i >= 0; i--) {          // only move leaves that are out of place
+    const want = leaves[i + 1] || rings;
+    if (leaves[i].nextSibling !== want || leaves[i].parentNode !== bookEl) {
+      leaves[i].style.transition = "none";
+      bookEl.insertBefore(leaves[i], want);
+    }
+  }
+  for (const [k, l] of leafByKey) if (!order.includes(k)) { l.remove(); leafByKey.delete(k); }
+  const idx = order.indexOf(curKey);
+  cur = idx >= 0 ? idx : Math.min(cur, order.length - 1);
+  layout(0, 0);
+  requestAnimationFrame(() => leaves.forEach(l => { if (l.style.transition === "none") l.style.transition = ""; }));
+  buildJump();
+}
+
+function layout(boostFrom, boostTo) {
+  const N = leaves.length;
+  leaves.forEach((leaf, k) => {
+    leaf.classList.toggle("flipped", k < cur);
+    const moving = k >= boostFrom && k < boostTo;
+    leaf.style.zIndex = (k < cur ? k + 1 : N - k) + (moving ? 400 : 0);
+  });
+  sync();
+}
+function goTo(s) {
+  s = Math.max(0, Math.min(leaves.length - 1, s));
+  if (s === cur) return;
+  const from = Math.min(s, cur), to = Math.max(s, cur), fwd = s > cur;
+  const jump = to - from;
+  leaves.forEach((leaf, k) => {
+    leaf.style.transitionDelay = k >= from && k < to && !reduced ? `${(fwd ? k - from : to - 1 - k) * Math.min(90, 600 / jump)}ms` : "";
+  });
+  cur = s;
+  document.activeElement?.blur?.();
+  layout(from, to);
+  clearTimeout(goTo.t);
+  goTo.t = setTimeout(() => { leaves.forEach(l => l.style.transitionDelay = ""); layout(0, 0); }, reduced ? 50 : 1500);
+}
+const next = () => goTo(cur + 1), prev = () => goTo(cur - 1);
+
+// ---- input: wheel, keys (incl. presenter clickers), drag ----
+let wheelAcc = 0, wheelLock = 0, wheelIdle;
+addEventListener("wheel", e => {
+  if (e.target.closest("textarea, select, .sheet")) return;
+  e.preventDefault();
+  const now = performance.now();
+  clearTimeout(wheelIdle); wheelIdle = setTimeout(() => wheelAcc = 0, 220);
+  if (now < wheelLock) return;
+  wheelAcc += e.deltaY;
+  if (Math.abs(wheelAcc) > 40) { wheelAcc > 0 ? next() : prev(); wheelAcc = 0; wheelLock = now + 700; }
+}, { passive: false });
+addEventListener("keydown", e => {
+  if (e.target.closest("input, textarea, select")) return;
+  if (["ArrowDown", "ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); next(); }
+  else if (["ArrowUp", "ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
+  else if (e.key === "Home") goTo(0);
+  else if (e.key === "End") goTo(leaves.length - 1);
+  else if (e.key === "d" || e.key === "D") setDm(!dmOn);
+  else if (e.key === "f" || e.key === "F") toggleFs();
+});
+let drag = null;
+bookEl.addEventListener("pointerdown", e => {
+  if (e.target.closest(".pad, .uploader, textarea, input, button, label, .note")) return;
+  const r = bookEl.getBoundingClientRect();
+  drag = { startY: e.clientY, H: r.height, lowerHalf: e.clientY - r.top > r.height / 2, moved: false, fwd: true, angle: 0 };
+  bookEl.setPointerCapture(e.pointerId);
+});
+bookEl.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const dy = e.clientY - drag.startY;
+  if (!drag.moved) {
+    if (Math.abs(dy) < 6) return;
+    drag.fwd = dy < 0;
+    if (drag.fwd ? cur >= leaves.length - 1 : cur <= 0) { drag = null; return; }
+    drag.moved = true;
+    drag.leaf = leaves[drag.fwd ? cur : cur - 1];
+    drag.leaf.style.transition = "none"; drag.leaf.style.opacity = 1; drag.leaf.style.zIndex = 600;
+  }
+  const t = Math.max(0, Math.min(1, Math.abs(dy) / (drag.H * 0.9)));
+  drag.angle = drag.fwd ? t * 100 : 100 - t * 100;
+  drag.leaf.style.transform = `rotateX(${drag.angle}deg)`;
+});
+function endDrag() {
+  if (!drag) return;
+  const d = drag; drag = null;
+  if (!d.moved) { d.lowerHalf ? next() : prev(); return; }
+  d.leaf.style.transition = ""; d.leaf.style.transform = ""; d.leaf.style.opacity = "";
+  if (d.fwd ? d.angle > 40 : d.angle < 60) goTo(d.fwd ? cur + 1 : cur - 1);
+  else { const k = leaves.indexOf(d.leaf); layout(k, k + 1); setTimeout(() => layout(0, 0), 800); }
+}
+bookEl.addEventListener("pointerup", endDrag);
+bookEl.addEventListener("pointercancel", endDrag);
+
+// ---- toolbar: jump menu, counter, idle hide, fullscreen ----
+const toolbar = document.getElementById("toolbar");
+const jump = document.getElementById("jump");
+const counter = document.getElementById("counter");
+const CHAPTERS = [["cover", "01 封面"], ["staff", "02 工作人員介紹"], ["sailors", "03 水手介紹"],
+  ...SECTIONS.map(s => [s.key, `${s.no} ${s.title}`]), ["final", "11 最後的大合照"]];
+function buildJump() {
+  if (jump.options.length) return;
+  CHAPTERS.forEach(([k, label]) => jump.add(new Option(label, k)));
+  jump.onchange = () => { goTo(order.indexOf(jump.value)); bookEl.focus(); };
+}
+function sectionOf(key) { return key?.startsWith("board:") ? key.split(":")[1] : key; }
+function sync() {
+  counter.textContent = `${cur + 1} / ${leaves.length}`;
+  jump.value = sectionOf(order[cur]);
+}
+let idleT;
+function wake() { toolbar.classList.remove("idle"); clearTimeout(idleT); idleT = setTimeout(() => { if (!toolbar.contains(document.activeElement)) toolbar.classList.add("idle"); }, 2500); }
+["pointermove", "pointerdown", "keydown"].forEach(ev => addEventListener(ev, wake, { passive: true }));
+wake();
+setTimeout(() => document.getElementById("tip").hidden = true, 8000);
+function toggleFs() {
+  if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+}
+document.getElementById("fs").onclick = toggleFs;
+
+// ---- guestbook notes ----
+let db = null, user = null, assets = null, uid = null, canWrite = true;
+const pads = {}, padColor = {};
+const sheet = document.getElementById("sheet"), sheetText = document.getElementById("sheet-text");
+let sheetSec = null;
+function hash(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); }
+
+function makePad(sec) {
+  const f = document.createElement("form"); f.className = "pad"; f.autocomplete = "off";
+  f.innerHTML = `<textarea maxlength="60" placeholder="寫下你的留言…" aria-label="留言內容"></textarea>
+    <div class="pad-row"><span class="pad-n">0/60</span><button type="submit">貼上 ↗</button></div>
+    <button type="button" class="pad-open">寫便條 ✎</button>`;
+  const ta = f.querySelector("textarea"), n = f.querySelector(".pad-n");
+  padColor[sec] = Math.floor(Math.random() * NOTE_COLORS.length);
+  f.style.setProperty("--nc", NOTE_COLORS[padColor[sec]]);
+  ta.oninput = () => n.textContent = `${ta.value.length}/60`;
+  ta.onkeydown = e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); f.requestSubmit(); } };
+  f.onsubmit = async e => { e.preventDefault(); if (await postNote(sec, ta.value)) { ta.value = ""; n.textContent = "0/60"; } };
+  f.querySelector(".pad-open").onclick = () => {
+    sheetSec = sec; sheet.hidden = false;
+    document.getElementById("sheet-title").textContent = `寫便條 · ${SECTIONS.find(s => s.key === sec).title}`;
+    sheetText.focus();
+  };
+  return f;
+}
+SECTIONS.forEach(s => pads[s.key] = makePad(s.key));
+sheet.onsubmit = async e => { e.preventDefault(); if (await postNote(sheetSec, sheetText.value)) { sheetText.value = ""; sheet.hidden = true; } };
+document.getElementById("sheet-cancel").onclick = () => sheet.hidden = true;
+
+async function postNote(sec, text) {
+  text = text.trim();
+  if (!text || !db || !canWrite) return false;
+  const color = padColor[sec];
+  try {
+    await db.collection("notes").add({ section: sec, text, author: uid, at: Date.now(), color });
+    padColor[sec] = (color + 1 + Math.floor(Math.random() * 3)) % NOTE_COLORS.length;
+    pads[sec].style.setProperty("--nc", NOTE_COLORS[padColor[sec]]);
+    return true;
+  } catch (err) {
+    if (err?.code === "invalid_argument") setReadOnly();
+    return false;
+  }
+}
+function setReadOnly() {
+  canWrite = false;
+  Object.values(pads).forEach(p => {
+    p.querySelector("textarea").disabled = true;
+    p.querySelector("textarea").placeholder = "你目前只能瀏覽留言";
+    p.querySelectorAll("button").forEach(b => b.disabled = true);
+  });
+}
+
+function noteEl(n, ps) {
+  const el = document.createElement("div"); el.className = "note"; el.dataset.id = n.id;
+  el.style.setProperty("--nc", NOTE_COLORS[n.color % NOTE_COLORS.length] || NOTE_COLORS[0]);
+  el.style.setProperty("--r", `${(hash(n.id) % 70) / 10 - 3.5}deg`);
+  const p = document.createElement("p"); p.textContent = n.text;
+  const by = document.createElement("span"); by.className = "by";
+  el.append(p, by); setBy(el, n, ps);
+  return el;
+}
+function setBy(el, n, ps) {
+  const p = n.author ? ps[n.author] : null;
+  el.querySelector(".by").textContent = "— " + (p ? (p.name || "水手") : "示範");
+}
+function fly(el, from) {
+  if (reduced || !from || el.closest(".leaf") !== leaves[cur]) return;
+  const a = from.getBoundingClientRect(), b = el.getBoundingClientRect();
+  if (!b.width) return;
+  const dx = a.left + a.width / 2 - (b.left + b.width / 2), dy = a.top + a.height / 2 - (b.top + b.height / 2);
+  const r = el.style.getPropertyValue("--r");
+  el.classList.add("flying");
+  el.animate([
+    { transform: `translate(${dx}px, ${dy}px) rotate(0deg) scale(1)` },
+    { transform: `translate(${dx * .4}px, ${dy * .4 - b.height * .5}px) rotate(-10deg) scale(1.18)`, boxShadow: "14px 18px 0 rgba(17,17,17,.3)", offset: .5 },
+    { transform: `translate(0, 0) rotate(${r}) scale(1)` },
+  ], { duration: 1100, easing: "cubic-bezier(.3, .7, .3, 1)" }).onfinish = () => el.classList.remove("flying");
+}
+async function renderBoards(newIds) {
+  const ids = [...new Set(allNotes.map(n => n.author).filter(Boolean))];
+  const ps = user && ids.length ? await user.profiles(ids) : {};
+  for (const s of SECTIONS) {
+    const list = notesBySection[s.key] || [];
+    const pages = boardPages(s.key);
+    for (let i = 0; i < pages; i++) {
+      const leaf = leafByKey.get(`board:${s.key}:${i}`); if (!leaf) continue;
+      const corner = leaf.querySelector(".corner");
+      leaf.querySelector(".board-count").textContent = pages > 1 ? `${i + 1} / ${pages}` : `${list.length} 則`;
+      if (i === pages - 1) { if (corner.firstElementChild !== pads[s.key]) corner.replaceChildren(pads[s.key]); }
+      else if (!corner.querySelector(".cont")) { const c = document.createElement("div"); c.className = "cont"; c.textContent = "下一頁繼續 ↓"; corner.replaceChildren(c); }
+      const chunk = list.slice(i * PER, i * PER + PER);
+      leaf.querySelectorAll(".slot").forEach((slot, j) => {
+        const n = chunk[j], el = slot.firstElementChild;
+        if (!n) { if (el) el.remove(); return; }
+        if (el && el.dataset.id === n.id) { setBy(el, n, ps); return; }
+        const ne = noteEl(n, ps); slot.replaceChildren(ne);
+        if (newIds.has(n.id)) fly(ne, corner);
+      });
+    }
+  }
+}
+
+// ---- final group photo ----
+const photoBox = document.getElementById("final-photo");
+const upStatus = document.getElementById("up-status");
+function showPhoto(id, animate) { showPhotoSrc("/_blob/" + id, animate); }
+function showPhotoSrc(src, animate) {
+  const img = new Image(); img.alt = "最後的大合照";
+  img.onerror = () => { photoBox.replaceChildren(Object.assign(document.createElement("div"), { className: "final-empty", textContent: "照片載入失敗，請重新整理" })); };
+  img.onload = () => { if (animate) img.classList.add("develop"); photoBox.replaceChildren(img); };
+  img.src = src;
+}
+async function shrink(file, max) {
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return await new Promise(res => c.toBlob(b => res(b || file), "image/jpeg", .86));
+  } catch { return file; }
+}
+// Demo: pretend everyone may upload. Set to false to hide the button from people without permission.
+const PRETEND_UPLOAD = true;
+const photoInput = document.getElementById("photo-input");
+function setUploader(allowed) { document.getElementById("uploader").hidden = !allowed; }
+setUploader(PRETEND_UPLOAD);
+photoInput.onchange = async e => {
+  const file = e.target.files[0]; e.target.value = "";
+  if (!file) return;
+  upStatus.textContent = "壓縮照片中…";
+  const blob = await shrink(file, 2400);
+  if (!assets || !db) {                 // demo upload: show it on this device only
+    showPhotoSrc(URL.createObjectURL(blob), true);
+    upStatus.textContent = "示範模式：照片只顯示在這台裝置，沒有真的上傳。";
+    return;
+  }
+  upStatus.textContent = "上傳中…";
+  try {
+    const r = await assets.upload(blob, { type: blob.type || "image/jpeg" });
+    await db.doc("photos/final").set({ assetId: r.id, at: Date.now(), by: uid });
+    upStatus.textContent = "已上傳，投影畫面會自動顯示。";
+  } catch (err) {
+    upStatus.textContent = err?.code === "too_large" ? "照片太大，請換一張。"
+      : err?.code === "quota_or_state" ? "儲存空間已滿。" : "上傳失敗，請再試一次。";
+  }
+};
+
+// ---- danmaku ----
+const layer = document.getElementById("danmaku");
+const dmToggle = document.getElementById("dm-toggle");
+const LANES = 6, SPEED = 130;
+const laneFree = Array(LANES).fill(0);
+// Demo fallback: shown until the shared danmaku load, or when this view can't reach them
+const DEMO_DANMAKU = ["水手們辛苦了！！", "船長好帥", "+1 +1 +1", "我要看大合照！", "四個月一下就過了 QQ",
+  "攝影阿傑請收下我的膝蓋", "下一屆還要來", "全體水手 衝衝衝", "謝謝工作人員！", "VOYAGE 2026 完結撒花"].map(text => ({ text }));
+let dmOn = true, danmaku = DEMO_DANMAKU.slice(), dmIdx = 0;
+function setDm(on) {
+  dmOn = on; dmToggle.setAttribute("aria-pressed", on);
+  dmToggle.textContent = on ? "彈幕：開" : "彈幕：關";
+  if (!on) layer.replaceChildren();
+}
+dmToggle.onclick = () => setDm(!dmOn);
+function launch(m, mine) {
+  if (!dmOn || document.hidden) return false;
+  const now = performance.now(), lane = laneFree.findIndex(t => t <= now);
+  if (lane < 0) return false;
+  const el = document.createElement("span"); el.className = "bullet" + (mine ? " mine" : ""); el.textContent = m.text;
+  el.style.top = `${12 + lane * 13}%`;
+  layer.append(el);
+  const W = layer.clientWidth, w = el.offsetWidth;
+  laneFree[lane] = now + ((w + 60) / SPEED) * 1000;
+  el.animate([{ transform: `translateX(${W}px)` }, { transform: `translateX(${-w}px)` }],
+    { duration: ((W + w) / SPEED) * 1000, easing: "linear" }).onfinish = () => el.remove();
+  return true;
+}
+setInterval(() => { if (danmaku.length && launch(danmaku[dmIdx % danmaku.length])) dmIdx++; }, 1100);
+document.getElementById("dm-form").onsubmit = async e => {
+  e.preventDefault();
+  const input = document.getElementById("dm-text"), text = input.value.trim();
+  if (!text || !db) return;
+  const msg = { text, month: "all", author: uid, at: Date.now() };
+  try { await db.collection("messages").add(msg); input.value = ""; launch(msg, true); } catch {}
+};
+
+// ---- start ----
+setDm(dmOn);
+rebuild();
+renderBoards(new Set());
+bookEl.focus();
+
+(async () => {
+  [db, user, assets] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("assets")]);
+  setUploader(PRETEND_UPLOAD || !!(assets && db));
+  if (!db) { setReadOnly(); return; }
+  uid = user ? await user.id() : null;
+  if ((user ? await user.can("data.write") : null) === false) setReadOnly();
+
+  let firstNotes = true;
+  db.collection("notes").orderBy("at", "asc").limit(1000).onSnapshot(snap => {
+    const newIds = new Set();
+    if (!firstNotes) snap.docChanges().forEach(c => { if (c.type === "added") newIds.add(c.doc.id); });
+    firstNotes = false;
+    allNotes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    notesBySection = {};
+    allNotes.forEach(n => (notesBySection[n.section] ||= []).push(n));
+    rebuild();
+    renderBoards(newIds);
+  }, () => {});
+
+  let firstPhoto = true;
+  db.doc("photos/final").onSnapshot(s => {
+    const id = s.exists ? s.data().assetId : null;
+    if (id && /^[0-9a-f]{32}$/.test(id)) {
+      if (!firstPhoto) goTo(order.indexOf("final"));
+      showPhoto(id, !firstPhoto);
+    }
+    firstPhoto = false;
+  }, () => {});
+
+  let firstDm = true;
+  db.collection("messages").orderBy("at", "desc").limit(200).onSnapshot(snap => {
+    if (snap.size) danmaku = snap.docs.map(d => d.data()).sort(() => Math.random() - .5);
+    if (!firstDm) snap.docChanges().forEach(c => {
+      const m = c.doc.data();
+      if (c.type === "added" && m.author !== uid && Date.now() - m.at < 60000) launch(m);
+    });
+    firstDm = false;
+  }, () => {});
+})();
+</script>
