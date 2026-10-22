@@ -1,7 +1,7 @@
 -- Run with `npx supabase test db` (local Supabase must be running).
 -- Rows older than "now" are inserted by hand to stand in for earlier requests.
 begin;
-select plan(30);
+select plan(31);
 
 -- ---- schema and access ----
 
@@ -42,6 +42,16 @@ set local role service_role;
 
 select ok(
   public.post_danmaku('d1', 'ip1', '小明', '恭喜結業！') ? 'danmaku', 'first danmaku goes in'
+);
+-- Held until commit, so ids become visible in order (20261022000005). A bigint advisory key shows
+-- up in pg_locks split into classid (high 32 bits) and objid (low 32 bits).
+select ok(
+  exists(
+    select 1 from pg_locks
+    where locktype = 'advisory' and pid = pg_backend_pid() and objsubid = 1
+      and objid::bigint = (hashtext('danmaku:insert')::bigint & 4294967295)
+  ),
+  'an accepted danmaku holds the insert lock until commit'
 );
 select is(
   (select array(select jsonb_object_keys(public.post_danmaku('d0', 'ip0', 'a', 'b') -> 'danmaku') order by 1)),
