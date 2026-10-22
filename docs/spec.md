@@ -13,7 +13,7 @@
 | 主畫面 | 現場投影（16:9），由工作人員用滾輪、方向鍵或簡報筆操作 |
 | 來賓互動 | 手機掃 QR code 進入彈幕頁，輸入姓名和內容後送出；留言板可在書頁上填寫 |
 | 預估同時在線 | 約 300 人發彈幕；訂閱即時訊息的只有投影端 1–2 台 |
-| 活動後 | 網站繼續公開，但加上 `noindex`，不讓搜尋引擎收錄；留言板繼續開放 |
+| 活動後 | 網站繼續公開，但加上 `noindex`，不讓搜尋引擎收錄；留言板繼續開放，之後封存成唯讀（見 3.6） |
 
 **不在本次範圍內：** Google 登入（資料表先預留欄位，之後再接）、手機版的完整翻書體驗（手機能看就好，不另外優化）。
 
@@ -53,8 +53,8 @@
 - 欄位：姓名（必填，最多 20 字）、內容（必填，最多 50 字）。輸入框旁要有即時字數計算，前後端都要驗證字數
 - 送出後，便條紙要從輸入框飛到空位並「黏上」：位移、輕微旋轉、落地時彈一下；便條顏色從 4 色中隨機挑一個
 - 每頁放 9 張便條，右下角保留給輸入框；留言超過一頁時自動加頁
-- 別人新增的留言要即時出現（走 Realtime Broadcast）
-- 活動結束後繼續開放留言，不需要審核
+- 別人新增的留言要即時出現（走 Realtime Broadcast）；只有投影電腦即時更新，一般訪客重新整理後才看到（見 3.5）
+- 活動結束後繼續開放留言，不需要審核，直到封存（見 3.6）
 - 可以隱藏式下架：管理員在後台按下隱藏後，那則留言不再顯示，但資料仍留在 DB（`hidden_at` 欄位）
 - 之後要接 Google 登入：資料表先預留可以為空的 `user_id` 欄位，接了登入也不用改 schema
 
@@ -90,6 +90,20 @@
   - 留言列表，可隱藏／取消隱藏
   - 上傳大合照
   - 編輯髒話詞庫（可留到下一版；第一版先寫在程式裡）
+
+### 3.5 只讓投影電腦訂閱 Realtime
+
+每個訂閱的瀏覽器都佔一條連線。書頁不擋，任何人都能翻書和留言；只有投影電腦訂閱 Realtime、顯示彈幕層和 QR code。
+
+- 投影電腦第一次開 `/?key=<SCREEN_KEY>`，proxy 驗證後發 `screen` cookie（httpOnly，48 小時，值為 `SCREEN_KEY` 的 HMAC），並導回不帶 key 的網址
+- 伺服器讀 cookie 後把 `isProjector` 傳給書頁；hooks 只在 `isProjector` 時訂閱，其他人載入時抓一次資料
+- key 外流時換掉 `SCREEN_KEY` 重新部署，舊 cookie 就失效
+
+### 3.6 第二階段（活動後再做）
+
+- **封存**：匯出留言（含暱稱）到 `content/archive.json`，用 `NEXT_PUBLIC_DATA_SOURCE=archive` 切成唯讀靜態網站，之後可停用 Supabase。彈幕不留存
+- **暱稱**：留言改用 Supabase 匿名登入加暱稱，取代自填姓名。暱稱設定後不能改、不能重複，管理員可修改不當暱稱。舊留言保留原本的姓名
+- **Google**：之後用 `linkIdentity` 綁定 Google，`user_id` 不變，留言和暱稱都保留
 
 ## 4. UI 設計風格
 
@@ -151,7 +165,7 @@ flowchart LR
 
 Vercel 是 serverless，無法維持長連線，所以即時推播交給 Supabase Realtime。我們用的是 **Broadcast**，不是 Postgres Changes，因為 Postgres Changes 每筆變更都要對每個訂閱者檢查權限，人一多就會慢。
 
-- 只有投影端（1–2 台）和正在看書頁的人會訂閱，手機送出頁不訂閱。免費方案的上限約是同時 200 條連線、每秒 100 則訊息（開工前請以 [Supabase 官方 pricing](https://supabase.com/pricing) 為準），對這個情境綽綽有餘
+- 只有投影端（1–2 台）會訂閱（見 3.5），一般訪客的書頁和手機送出頁都不訂閱。免費方案的上限約是同時 200 條連線、每秒 100 則訊息（開工前請以 [Supabase 官方 pricing](https://supabase.com/pricing) 為準），對這個情境綽綽有餘
 - 頻道設為 **private channel**，在 `realtime.messages` 上設 RLS：匿名使用者可以接收（select），不能發送（insert）。只有伺服器用 service role key 透過 REST 發送。這樣可以防止有人拿 anon key 繞過 API 直接對投影幕洗版
 
 ### 5.2 資料表
@@ -294,12 +308,13 @@ flowchart LR
 | 14 | 留言板頁 UI 和便條飛入動畫（用 mock） | `components/guestbook/` | 3, 4 | guestbook |
 | 15 | 留言 API：`GET`／`POST /api/notes` | `app/api/notes/` | 4, 5 | guestbook |
 | 16 | 手機彈幕送出頁 `/danmaku` | `app/danmaku/` | 2, 4 | danmaku |
-| 17 | 彈幕 API：`cid` proxy、限流、髒話過濾 | `app/api/danmaku/`、`proxy.ts`、`lib/ratelimit.ts`、`lib/profanity.ts` | 4, 5 | danmaku |
-| 18 | 投影端彈幕層和懸浮 QR code | `components/danmaku/` | 3, 4 | danmaku |
+| 17 | 彈幕 API：`cid` proxy、限流、髒話過濾 | `app/api/danmaku/`、`proxy.ts`、`lib/ratelimit.ts`、`lib/profanity.ts` | 4, 5, 34 | danmaku |
+| 18 | 投影端彈幕層和懸浮 QR code（只在 `isProjector` 時顯示） | `components/danmaku/` | 3, 4, 34 | danmaku |
 | 19 | 管理後台：登入、彈幕下架、留言隱藏、彈幕總開關 | `app/admin/`、`app/api/admin/`（不含 final-photo） | 4, 5 | admin |
 | 20 | 大合照上傳（管理後台內的一個區塊） | `app/admin/PhotoUpload.tsx`、`app/api/admin/final-photo/` | 19 | admin |
 | 21 | 壓力測試：模擬 300 人送彈幕 | `scripts/loadtest/` | 17 | ops |
 | 22 | 投影彩排：字級、對比、簡報筆、備援方案 | — | 全部 | ops |
+| 34 | 投影電腦識別：`SCREEN_KEY`、`screen` cookie、`isProjector()`（見 3.5）；由 #17 在 `proxy.ts` 呼叫 | `lib/screen-gate.ts`、`.env.example` | 1 | P1 |
 
 ### 7.3 備援方案
 
