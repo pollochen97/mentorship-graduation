@@ -17,17 +17,22 @@ export async function GET(request: NextRequest) {
   const section = NoteSection.safeParse(request.nextUrl.searchParams.get("section"));
   if (!section.success) return errorResponse("invalid_input", "section 必須是 m1–m4");
 
-  // PostgREST caps every response at max_rows, so read page by page until a short page.
+  // PostgREST caps every response at max_rows, so read page by page until a short page. Each page
+  // starts after the last (created_at, id) seen, not at an offset: a note hidden on an earlier page
+  // mid-read would otherwise shift the rest forward and drop one that is still visible.
   const rows: NoteRow[] = [];
   for (;;) {
-    const { data, error } = await supabaseAdmin()
+    let query = supabaseAdmin()
       .from("notes")
       .select(NOTE_COLUMNS)
       .eq("section", section.data)
-      .is("hidden_at", null)
-      .order("created_at")
-      .order("id")
-      .range(rows.length, rows.length + PAGE_SIZE - 1);
+      .is("hidden_at", null);
+    const last = rows.at(-1);
+    if (last) {
+      const t = `"${last.created_at}"`;
+      query = query.or(`created_at.gt.${t},and(created_at.eq.${t},id.gt.${last.id})`);
+    }
+    const { data, error } = await query.order("created_at").order("id").limit(PAGE_SIZE);
     if (error) {
       console.error("[GET /api/notes]", error.message);
       return errorResponse("server_error");
