@@ -19,10 +19,12 @@ type State = { section: NoteSection; notes: Note[]; loaded: boolean; error: ApiE
 const fresh = (section: NoteSection): State => ({ section, notes: [], loaded: false, error: null });
 
 /**
- * The visible notes of one guestbook, oldest first, kept up to date by note:new / note:hide.
+ * The visible notes of one guestbook, oldest first.
+ * With `live` (the projector only, spec 3.5) they are kept up to date by note:new / note:hide;
+ * otherwise they are loaded once and only the visitor's own notes are added.
  * `post` sends a note and resolves with the result; on success the note is already in `notes`.
  */
-export function useNotes(section: NoteSection) {
+export function useNotes(section: NoteSection, { live = false }: { live?: boolean } = {}) {
   // Tagged with its section, so switching sections never shows the previous section's notes.
   const [state, setState] = useState(() => fresh(section));
   const current = state.section === section ? state : fresh(section);
@@ -49,6 +51,11 @@ export function useNotes(section: NoteSection) {
           : { error: r.error, loaded: true },
       );
     });
+    if (!live) {
+      return () => {
+        cancelled = true;
+      };
+    }
     const offNew = onLive("note:new", (note) => {
       if (note.section === section) update((s) => ({ notes: merge(s.notes, [note]) }));
     });
@@ -65,7 +72,7 @@ export function useNotes(section: NoteSection) {
       offNew();
       offHide();
     };
-  }, [section]);
+  }, [section, live]);
 
   const post = useCallback(
     async (input: Omit<NoteInput, "section">): Promise<ApiResult<Note>> => {

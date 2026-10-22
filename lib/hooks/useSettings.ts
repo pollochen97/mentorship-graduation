@@ -7,8 +7,11 @@ import type { Settings } from "../schemas";
 
 const DEFAULTS: Settings = { danmakuEnabled: true, finalPhotoUrl: null };
 
-/** Site settings, kept up to date by settings:update and photo:final. */
-export function useSettings() {
+/**
+ * Site settings. With `live` (the projector only, spec 3.5) they are kept up to date by
+ * settings:update and photo:final; otherwise they are loaded once.
+ */
+export function useSettings({ live = false }: { live?: boolean } = {}) {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +24,11 @@ export function useSettings() {
       if (r.ok) setSettings({ ...r.data, ...fromLive });
       setLoading(false);
     });
+    if (!live) {
+      return () => {
+        cancelled = true;
+      };
+    }
     const offUpdate = onLive("settings:update", (next) => {
       Object.assign(fromLive, next);
       setSettings(next);
@@ -34,7 +42,7 @@ export function useSettings() {
       offUpdate();
       offPhoto();
     };
-  }, []);
+  }, [live]);
 
   return { ...settings, loading };
 }
