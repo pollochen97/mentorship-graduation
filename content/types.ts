@@ -7,7 +7,7 @@ export type StaffMember = {
   role: string;
   name: string;
   /** One line. */
-  intro: string;
+  intro?: string;
   /** Path under public/, e.g. "/photos/staff/captain.jpg". */
   photo?: string;
 };
@@ -15,6 +15,8 @@ export type StaffMember = {
 export type Sailor = {
   /** Stable id, e.g. "s07"; also picks the illustrated avatar for sailors without a photo. */
   id: string;
+  /** Shown on the card; 航海士 come first in the list. */
+  rank: "航海士" | "水手";
   name: string;
   motto?: string;
   /** Path under public/; only for sailors who agreed to show it. */
