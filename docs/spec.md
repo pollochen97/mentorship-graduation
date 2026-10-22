@@ -308,13 +308,13 @@ flowchart LR
 | 14 | 留言板頁 UI 和便條飛入動畫（用 mock） | `components/guestbook/` | 3, 4 | guestbook |
 | 15 | 留言 API：`GET`／`POST /api/notes` | `app/api/notes/` | 4, 5 | guestbook |
 | 16 | 手機彈幕送出頁 `/danmaku` | `app/danmaku/` | 2, 4 | danmaku |
-| 17 | 彈幕 API：`cid` proxy、限流、髒話過濾 | `app/api/danmaku/`、`proxy.ts`、`lib/ratelimit.ts`、`lib/profanity.ts` | 4, 5 | danmaku |
-| 18 | 投影端彈幕層和懸浮 QR code（只在 `isProjector` 時顯示） | `components/danmaku/` | 3, 4, 23 | danmaku |
+| 17 | 彈幕 API：`cid` proxy、限流、髒話過濾 | `app/api/danmaku/`、`proxy.ts`、`lib/ratelimit.ts`、`lib/profanity.ts` | 4, 5, 34 | danmaku |
+| 18 | 投影端彈幕層和懸浮 QR code（只在 `isProjector` 時顯示） | `components/danmaku/` | 3, 4, 34 | danmaku |
 | 19 | 管理後台：登入、彈幕下架、留言隱藏、彈幕總開關 | `app/admin/`、`app/api/admin/`（不含 final-photo） | 4, 5 | admin |
 | 20 | 大合照上傳（管理後台內的一個區塊） | `app/admin/PhotoUpload.tsx`、`app/api/admin/final-photo/` | 19 | admin |
 | 21 | 壓力測試：模擬 300 人送彈幕 | `scripts/loadtest/` | 17 | ops |
 | 22 | 投影彩排：字級、對比、簡報筆、備援方案 | — | 全部 | ops |
-| 23 | 投影電腦識別：`SCREEN_KEY`、`screen` cookie、`isProjector()`（見 3.5）；由 #17 在 `proxy.ts` 呼叫 | `lib/screen-gate.ts` | 1 | P1 |
+| 34 | 投影電腦識別：`SCREEN_KEY`、`screen` cookie、`isProjector()`（見 3.5）；由 #17 在 `proxy.ts` 呼叫 | `lib/screen-gate.ts`、`.env.example` | 1 | P1 |
 
 ### 7.3 備援方案
 
