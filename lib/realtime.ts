@@ -1,10 +1,11 @@
 // Live updates over Supabase Realtime Broadcast (#4). One private channel, `live`, shared by every
 // hook on the page. Only the server sends (lib/supabase, #5); browsers only listen.
 // In mock mode (NEXT_PUBLIC_USE_MOCK=1) the events come from lib/mock instead.
-import { createClient, type RealtimeChannel, type SupabaseClient } from "@supabase/supabase-js";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { z } from "zod";
 import { startMockLive, USE_MOCK } from "./mock";
 import { Danmaku, DanmakuRemove, Note, NoteHide, PhotoFinal, Settings } from "./schemas";
+import { supabaseBrowser } from "./supabase/browser";
 
 export const LIVE_CHANNEL = "live";
 
@@ -50,24 +51,19 @@ function setStatus(next: LiveStatus) {
   statusListeners.forEach((listener) => listener(next));
 }
 
-let client: SupabaseClient | null = null;
-
 function connect(): () => void {
   if (USE_MOCK) {
     setStatus("connected");
     return startMockLive(dispatchLive, setStatus);
   }
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) {
+  const supabase = supabaseBrowser();
+  if (!supabase) {
     console.warn(
       "[live] NEXT_PUBLIC_SUPABASE_URL / ANON_KEY are not set; set NEXT_PUBLIC_USE_MOCK=1 to use fake data",
     );
     setStatus("disconnected");
     return () => {};
   }
-  client ??= createClient(url, key, { auth: { persistSession: false } });
-  const supabase = client;
   let channel: RealtimeChannel | null = null;
   let closed = false;
   setStatus("connecting");
