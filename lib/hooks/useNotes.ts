@@ -7,10 +7,13 @@ import type { ApiError, Note, NoteInput, NoteSection } from "../schemas";
 
 const byTime = (a: Note, b: Note) => a.createdAt.localeCompare(b.createdAt);
 
-/** Adds notes that aren't there yet (live events and the initial load can arrive in either order). */
+/**
+ * Adds notes that aren't there yet (live events and the initial load can arrive in either order).
+ * `incoming` may hold the same note twice, e.g. a note posted here that also came back as note:new.
+ */
 function merge(list: Note[], incoming: Note[]) {
   const ids = new Set(list.map((n) => n.id));
-  const added = incoming.filter((n) => !ids.has(n.id));
+  const added = incoming.filter((n) => !ids.has(n.id) && ids.add(n.id));
   return added.length ? [...list, ...added].sort(byTime) : list;
 }
 
