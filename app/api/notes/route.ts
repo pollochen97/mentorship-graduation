@@ -6,26 +6,36 @@ import { errorResponse, readJson } from "@/lib/http";
 import { NoteInput, NoteSection } from "@/lib/schemas";
 import { broadcast } from "@/lib/supabase/broadcast";
 import { postNote } from "@/lib/supabase/posts";
-import { NOTE_COLUMNS, toNote } from "@/lib/supabase/rows";
+import { NOTE_COLUMNS, type NoteRow, toNote } from "@/lib/supabase/rows";
 import { supabaseAdmin } from "@/lib/supabase/server";
+
+/** Rows per request; must not exceed max_rows (supabase/config.toml), or a capped page would look like the last. */
+const PAGE_SIZE = 1000;
 
 /** GET /api/notes?section=m1 → { notes }: the visible notes of one guestbook, oldest first. */
 export async function GET(request: NextRequest) {
   const section = NoteSection.safeParse(request.nextUrl.searchParams.get("section"));
   if (!section.success) return errorResponse("invalid_input", "section 必須是 m1–m4");
 
-  const { data, error } = await supabaseAdmin()
-    .from("notes")
-    .select(NOTE_COLUMNS)
-    .eq("section", section.data)
-    .is("hidden_at", null)
-    .order("created_at")
-    .order("id");
-  if (error) {
-    console.error("[GET /api/notes]", error.message);
-    return errorResponse("server_error");
+  // PostgREST caps every response at max_rows, so read page by page until a short page.
+  const rows: NoteRow[] = [];
+  for (;;) {
+    const { data, error } = await supabaseAdmin()
+      .from("notes")
+      .select(NOTE_COLUMNS)
+      .eq("section", section.data)
+      .is("hidden_at", null)
+      .order("created_at")
+      .order("id")
+      .range(rows.length, rows.length + PAGE_SIZE - 1);
+    if (error) {
+      console.error("[GET /api/notes]", error.message);
+      return errorResponse("server_error");
+    }
+    rows.push(...data);
+    if (data.length < PAGE_SIZE) break;
   }
-  return Response.json({ notes: data.map(toNote) });
+  return Response.json({ notes: rows.map(toNote) });
 }
 
 /** POST /api/notes (NoteInput) → 201 { note }, then note:new to the projector. */
