@@ -1,4 +1,4 @@
-// The 24 crew members for the 水手介紹 pages (#10): 4 航海士 first, then 20 水手.
+// The 24 學員 for the 學員介紹 pages (#10): 4 航海士 first, then 20 水手.
 // TODO(#6): fill in the names marked 待提供; add mottos, and photos and LinkedIn only for crew
 // members who agreed to make them public.
 import type { Sailor } from "./types";
@@ -10,7 +10,7 @@ const SAILOR_NAMES = [
   "Jessy",
   "琪雯",
   "文凱",
-  "pei hsuan",
+  "Pei Hsuan",
   "Ray",
   "Serene",
   "Will",
