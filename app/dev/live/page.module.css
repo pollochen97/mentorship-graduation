@@ -1,0 +1,118 @@
+.main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 16px 80px;
+  display: grid;
+  gap: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.card {
+  background: var(--white);
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.card h1,
+.card h2,
+.card p {
+  margin: 0;
+}
+
+.card h1 {
+  font: 700 26px/1.2 var(--f-display);
+}
+
+.card h2 {
+  font: 700 17px/1.2 var(--f-mono);
+}
+
+.card button,
+.card input {
+  font-size: 14px;
+  border: 2px solid var(--ink);
+  background: var(--white);
+  padding: 4px 8px;
+}
+
+.card button {
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.card button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.card input {
+  min-width: 0;
+  flex: 1;
+}
+
+.card pre {
+  margin: 0;
+  padding: 8px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  font: 13px/1.5 var(--f-mono);
+  white-space: pre-wrap;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+}
+
+.removed {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.card .small {
+  flex: none;
+  font-size: 12px;
+  padding: 0 6px;
+  box-shadow: none;
+}
+
+.photo {
+  width: 100%;
+  border: 2px solid var(--ink);
+}
