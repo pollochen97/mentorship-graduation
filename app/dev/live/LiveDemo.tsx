@@ -12,14 +12,16 @@ type MockControls = Record<string, (...args: unknown[]) => void>;
 const mock = (name: string, ...args: unknown[]) =>
   (window as unknown as { __mock?: MockControls }).__mock?.[name]?.(...args);
 
-function useLiveStatus() {
+// Only rendered for the projector: following the status opens the connection too.
+function LiveStatusText() {
   const [status, setStatus] = useState<LiveStatus>("connecting");
   useEffect(() => onLiveStatus(setStatus), []);
-  return status;
+  return <b>{status}</b>;
 }
 
 export function LiveDemo() {
-  const status = useLiveStatus();
+  // Stands in for isProjector (spec 3.5): only the projector subscribes to Realtime.
+  const [live, setLive] = useState(true);
   return (
     <main className={styles.main}>
       <header className={styles.card}>
@@ -27,7 +29,18 @@ export function LiveDemo() {
         <p>
           #4 的 hooks 實際運作的樣子。模式：<b>{USE_MOCK ? "mock（假資料）" : "Supabase"}</b> ·
           連線：
-          <b>{status}</b>
+          {live ? <LiveStatusText /> : <b>不訂閱</b>}
+        </p>
+        <div className={styles.row}>
+          <button aria-pressed={live} onClick={() => setLive(true)}>
+            投影端
+          </button>
+          <button aria-pressed={!live} onClick={() => setLive(false)}>
+            一般訪客
+          </button>
+        </div>
+        <p className={styles.hint}>
+          一般訪客只在載入時抓一次資料，不訂閱 Realtime、不收彈幕；自己送出的留言仍會出現。
         </p>
         {USE_MOCK && (
           <p className={styles.hint}>
@@ -38,19 +51,26 @@ export function LiveDemo() {
         )}
       </header>
       <div className={styles.grid}>
-        <SettingsDemo />
-        <DanmakuDemo />
-        <NotesDemo />
+        <SettingsDemo live={live} />
+        {live ? (
+          <DanmakuDemo />
+        ) : (
+          <section className={styles.card}>
+            <h2>useDanmakuStream()</h2>
+            <p className={styles.hint}>只有投影端會掛上這個 hook。</p>
+          </section>
+        )}
+        <NotesDemo live={live} />
       </div>
     </main>
   );
 }
 
-function SettingsDemo() {
-  const { danmakuEnabled, finalPhotoUrl, loading } = useSettings();
+function SettingsDemo({ live }: { live: boolean }) {
+  const { danmakuEnabled, finalPhotoUrl, loading } = useSettings({ live });
   return (
     <section className={styles.card}>
-      <h2>useSettings()</h2>
+      <h2>useSettings({`{ live: ${live} }`})</h2>
       <pre>{JSON.stringify({ danmakuEnabled, finalPhotoUrl, loading }, null, 2)}</pre>
       {USE_MOCK && (
         <div className={styles.row}>
@@ -121,9 +141,9 @@ function DanmakuDemo() {
   );
 }
 
-function NotesDemo() {
+function NotesDemo({ live }: { live: boolean }) {
   const [section, setSection] = useState<NoteSection>("m1");
-  const { notes, post, loading, error } = useNotes(section);
+  const { notes, post, loading, error } = useNotes(section, { live });
   const [name, setName] = useState("訪客");
   const [body, setBody] = useState("");
   const [result, setResult] = useState("");
@@ -141,7 +161,9 @@ function NotesDemo() {
 
   return (
     <section className={styles.card}>
-      <h2>useNotes(&quot;{section}&quot;)</h2>
+      <h2>
+        useNotes(&quot;{section}&quot;, {`{ live: ${live} }`})
+      </h2>
       <div className={styles.row}>
         {NoteSection.options.map((s) => (
           <button key={s} aria-pressed={s === section} onClick={() => setSection(s)}>
