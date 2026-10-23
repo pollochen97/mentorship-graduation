@@ -70,6 +70,13 @@ test("blocks links", () => {
     "evil.com.tw",
     "socket.io",
     "evil.com-",
+    "buy.md",
+    "spam.py",
+    "ad.rs",
+    "promo.sh",
+    "go.java",
+    "files.zip",
+    "x.readme.md",
   ]) {
     assert.equal(check(text), true, text);
   }
@@ -85,6 +92,7 @@ test("doesn't take sentences or numbers for links", () => {
     "3.5 年",
     "v1.0",
     "ok...yes",
+    "Mr.Smith 你好",
   ]) {
     assert.equal(check(text), false, text);
   }
@@ -101,6 +109,10 @@ test("doesn't take file or tech names for links", () => {
     "app/page.tsx",
     "package.json",
     "main.py",
+    "setup.py",
+    "main.rs",
+    "install.sh",
+    "Main.java",
     "截圖.png",
     "photo-1.JPG",
   ]) {

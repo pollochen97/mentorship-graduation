@@ -1,6 +1,7 @@
 // Content filter for everything visitors post (#17, spec 6.3): normalise the text, then refuse
 // profanity and links. Shared by POST /api/danmaku and POST /api/notes.
 import { z } from "zod";
+import { TLDS } from "./tlds.ts";
 
 const ZERO_WIDTH = /[​-‍⁠﻿]/g;
 
@@ -104,31 +105,29 @@ const ALLOWED = [
   "媽媽的",
 ];
 
-// Links. Any domain written normally (example.dev, x.y.shop), with the scheme or www. even when
-// spaced out, and spaced-out domains ("example . com") for common TLDs only: with spaces removed, any
-// TLD would also catch two sentences ("Thank you. Love you").
+// Links: the scheme or www. even when spaced out; any name ending in a real TLD (example.dev,
+// x.y.shop), so file names like Next.js and index.html pass; and spaced-out domains ("example . com")
+// for common TLDs only, since with spaces removed "Thank you. Love you" would end in .love.
 const URL_SCHEME = /https?:|www\./;
 const DOTTED_NAME = /[a-z0-9-]+(?:\.[a-z0-9-]+)+/g;
 const SPACED_DOMAIN = /\.(?:com|net|org|tw|io|cc|me|co|xyz|top|link|ly|gg|app|site|info|biz)\b/;
 
-// File names and tech names (Next.js, README.md, next.config.ts) end like a domain but aren't links.
-// A few are real TLDs too (md, py, sh, rs), but nobody advertises on them.
-const FILE_EXTENSIONS = new Set(
-  [
-    "js jsx ts tsx mjs cjs json html htm css scss vue svelte",
-    "md mdx txt csv yml yaml toml xml env lock log sql",
-    "py rb go rs java kt swift dart php sh cpp hpp",
-    "png jpg jpeg gif svg webp mp3 mp4 pdf docx xlsx pptx",
-  ]
-    .join(" ")
-    .split(" "),
-);
+// Real TLDs that are also common file extensions: let through only as these well-known file names
+// (README.md, main.py), never as any name (buy.md, spam.py).
+const FILE_TLDS = new Set(["md", "py", "rs", "sh", "java"]);
+const FILE_NAMES = new Set([
+  ...["readme", "changelog", "contributing", "license", "index", "main", "app", "setup", "manage"],
+  ...["lib", "mod", "build", "install", "run", "start"],
+]);
 
-/** Whether `text` has a dotted name whose last part could be a TLD and isn't a file extension. */
+/** Whether `text` has a name ending in a real TLD that isn't a well-known file name. */
 function hasDomain(text: string) {
   for (const [name] of text.matchAll(DOTTED_NAME)) {
-    const last = name.slice(name.lastIndexOf(".") + 1);
-    if (/^[a-z]{2,63}$/.test(last) && !FILE_EXTENSIONS.has(last)) return true;
+    const dot = name.lastIndexOf(".");
+    const tld = name.slice(dot + 1);
+    if (!TLDS.has(tld)) continue;
+    if (FILE_TLDS.has(tld) && FILE_NAMES.has(name.slice(0, dot))) continue;
+    return true;
   }
   return false;
 }
