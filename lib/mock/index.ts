@@ -7,6 +7,9 @@
 //   __mock.pause() / resume()  settings:update     __mock.photo()      photo:final
 //   __mock.offline() / online()  Realtime drops / comes back; danmaku then only reach pollers
 //   __mock.list("m1")        ids of a guestbook's notes
+//   __mock.auth("none" | "checking" | "error" | "denied" | "allowed")
+//                            the guestbook's Google sign-in (#55); starts "allowed"
+//   __mock.notes(false) / notes(true)            close / open the guestbooks (settings:update)
 // Add ?mockLatency=1500 to the URL to make every mock request take 1.5 s (default 200 ms).
 import type { ApiResult } from "../api";
 import {
@@ -53,7 +56,7 @@ let nextDanmakuId = 1000;
 const recentDanmaku: Danmaku[] = [];
 let notes: Note[] | null = null;
 const hiddenNotes = new Set<string>();
-const settings: Settings = { danmakuEnabled: true, finalPhotoUrl: null };
+const settings: Settings = { danmakuEnabled: true, notesEnabled: true, finalPhotoUrl: null };
 let lastDanmakuAt = 0;
 let lastNoteAt = 0;
 
@@ -93,6 +96,31 @@ function secondsLeft(last: number, gap: number) {
   return Math.ceil(gap - (Date.now() - last) / 1000);
 }
 
+// ---- Google sign-in (#55) ----
+
+/**
+ * Signed out, or signed in and the whitelist is being checked, couldn't be checked, says no or yes.
+ * "error" turns into "allowed" when the reader retries.
+ */
+export type MockAuth = "none" | "checking" | "error" | "denied" | "allowed";
+let auth: MockAuth = "allowed";
+const authListeners = new Set<() => void>();
+
+/** The fake sign-in that lib/auth.ts uses in mock mode. */
+export const mockAuth = {
+  get: () => auth,
+  set(next: MockAuth) {
+    auth = next;
+    authListeners.forEach((listener) => listener());
+  },
+  subscribe(listener: () => void) {
+    authListeners.add(listener);
+    return () => {
+      authListeners.delete(listener);
+    };
+  },
+};
+
 // ---- API ----
 
 export const mockApi = {
@@ -105,6 +133,9 @@ export const mockApi = {
 
   async sendNote(input: NoteInput): Promise<ApiResult<Note>> {
     await wait();
+    if (auth === "none") return fail("unauthorized");
+    if (auth === "denied") return fail("not_allowed");
+    if (!settings.notesEnabled) return fail("notes_closed");
     if (blocked(input.body)) return fail("forbidden_content");
     const left = secondsLeft(lastNoteAt, NOTE_GAP_S);
     if (left > 0) return fail("rate_limited", left);
@@ -172,6 +203,13 @@ const controls = {
   },
   resume() {
     settings.danmakuEnabled = true;
+    send("settings:update", { ...settings });
+  },
+  auth(state: MockAuth = "allowed") {
+    mockAuth.set(state);
+  },
+  notes(open = true) {
+    settings.notesEnabled = open;
     send("settings:update", { ...settings });
   },
   offline() {

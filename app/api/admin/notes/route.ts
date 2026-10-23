@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 import { errorResponse } from "@/lib/http";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "../auth";
-import { ADMIN_NOTE_COLUMNS, toAdminNote } from "../rows";
+import { ADMIN_NOTE_COLUMNS, toAdminNotes } from "../rows";
 import { NotesFilter } from "../schemas";
 
 /** Enough to find a note posted during the event; older ones are rarely the problem. */
@@ -27,5 +27,5 @@ export async function GET(request: NextRequest) {
     console.error("[GET /api/admin/notes]", error.message);
     return errorResponse("server_error");
   }
-  return Response.json({ notes: data.map(toAdminNote) });
+  return Response.json({ notes: await toAdminNotes(data) });
 }

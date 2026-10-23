@@ -209,6 +209,7 @@ button:disabled {
 .meta {
   font: 500 0.75rem / 1.3 var(--f-mono);
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .hidden .text > :last-child {

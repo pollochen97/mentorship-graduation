@@ -29,6 +29,7 @@ function read<T>(
   if (a.error === "rate_limited")
     return { ok: false, code: "rate_limited", retryAfter: a.retry_after };
   if (a.error === "danmaku_paused") return { ok: false, code: "danmaku_paused" };
+  if (a.error === "notes_closed") return { ok: false, code: "notes_closed" };
   const data = pick(a);
   if (data === undefined) {
     console.error(`[${name}] unexpected answer`, answer.data);
@@ -51,14 +52,17 @@ export async function postDanmaku(
   return read("post_danmaku", answer, (a) => a.danmaku && toDanmaku(a.danmaku));
 }
 
-/** Inserts a note if the client is within the limits (spec 6.2). */
-export async function postNote(input: NoteInput & { clientId: string }): Promise<PostResult<Note>> {
+/** Inserts a note if the guestbooks are open and the client is within the limits (spec 6.2, #55). */
+export async function postNote(
+  input: NoteInput & { clientId: string; userId: string },
+): Promise<PostResult<Note>> {
   const answer = await supabaseAdmin().rpc("post_note", {
     p_client_id: input.clientId,
     p_section: input.section,
     p_name: input.name,
     p_body: input.body,
     p_color: input.color,
+    p_user_id: input.userId,
   });
   return read("post_note", answer, (a) => a.note && toNote(a.note));
 }

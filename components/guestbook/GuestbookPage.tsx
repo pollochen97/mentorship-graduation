@@ -15,7 +15,7 @@ import { NOTES_PER_PAGE } from "./paging";
  * the pad in the bottom-right corner of the last page. Earlier pages point on to the next one instead.
  */
 export function GuestbookPage({ section, label, no, pageIndex }: GuestbookPageProps) {
-  const { notes, post, loading, error, pages, shouldFly } = useGuestbook(section);
+  const { notes, post, loading, error, pages, shouldFly, enabled } = useGuestbook(section);
   const corner = useRef<HTMLDivElement>(null);
   const start = pageIndex * NOTES_PER_PAGE;
   const onPage = notes.slice(start, start + NOTES_PER_PAGE);
@@ -51,7 +51,7 @@ export function GuestbookPage({ section, label, no, pageIndex }: GuestbookPagePr
         ))}
         <div ref={corner} className={styles.corner}>
           {last ? (
-            <NotePad post={post} title={title} />
+            <NotePad post={post} title={title} enabled={enabled} />
           ) : (
             <p className={styles.more}>下一頁繼續 ↓</p>
           )}

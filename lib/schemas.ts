@@ -71,14 +71,23 @@ export type Danmaku = z.infer<typeof Danmaku>;
 
 export const Settings = z.object({
   danmakuEnabled: z.boolean(),
+  /** Whether the guestbooks take new notes; the admin opens them for a few days (#55). */
+  notesEnabled: z.boolean(),
   /** Public URL of the final group photo; null until the admin uploads it. */
   finalPhotoUrl: z.url().nullable(),
 });
 export type Settings = z.infer<typeof Settings>;
 
+// ---- the signed-in writer (#55) ----
+
+/** Who is signed in with Google, and whether that address is on the guestbook's whitelist. */
+export const Me = z.object({ email: z.string(), allowed: z.boolean() });
+export type Me = z.infer<typeof Me>;
+
 // ---- API responses ----
 // GET  /api/notes?section=m1      → NotesResponse
-// POST /api/notes   (NoteInput)    → NoteResponse
+// POST /api/notes   (NoteInput)    → NoteResponse; needs `Authorization: Bearer <Supabase access token>`
+// GET  /api/me                     → Me; the same header
 // POST /api/danmaku (DanmakuInput) → DanmakuResponse
 // GET  /api/danmaku?since=<id>     → DanmakuListResponse: newer than id, oldest first; if more than
 //                                    50 match, only the newest 50 (so since=0 gives the latest ones)
@@ -94,7 +103,9 @@ export const DanmakuListResponse = z.object({ danmaku: z.array(Danmaku) });
 /** Every API error has this body: { error: { code, message, retryAfter? } }. */
 export const ErrorCode = z.enum([
   "invalid_input", // 400: failed zod validation
-  "unauthorized", // 401: missing or invalid cid cookie / admin session
+  "unauthorized", // 401: missing or invalid cid cookie / admin session / Google sign-in
+  "not_allowed", // 403: signed in, but not on the guestbook's whitelist
+  "notes_closed", // 403: the admin closed the guestbooks
   "not_found", // 404
   "forbidden_content", // 422: profanity or a link
   "rate_limited", // 429: too fast; see retryAfter
@@ -117,6 +128,8 @@ export const ApiErrorBody = z.object({ error: ApiError });
 export const ERROR_STATUS: Record<ErrorCode, number> = {
   invalid_input: 400,
   unauthorized: 401,
+  not_allowed: 403,
+  notes_closed: 403,
   not_found: 404,
   forbidden_content: 422,
   rate_limited: 429,
@@ -129,6 +142,8 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
 export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   invalid_input: "內容格式不正確",
   unauthorized: "請重新整理頁面",
+  not_allowed: "這個帳號不在 ENG 名單內",
+  notes_closed: "留言已截止",
   not_found: "找不到資料",
   forbidden_content: "內容包含不當字詞或網址",
   rate_limited: "太快了，請稍後再試",
