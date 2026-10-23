@@ -6,7 +6,7 @@
 import "server-only";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import type { NextRequest, NextResponse } from "next/server";
+import { connection, type NextRequest, type NextResponse } from "next/server";
 import { errorResponse } from "@/lib/http";
 
 export const ADMIN_COOKIE = "admin";
@@ -80,5 +80,7 @@ export function requireAdmin(request: NextRequest) {
  * the caller must sit inside a <Suspense> boundary.
  */
 export async function isAdmin() {
+  // The expiry check calls Date.now(), which prerendering (and runtime prefetch) can't use.
+  await connection();
   return isValid((await cookies()).get(ADMIN_COOKIE)?.value);
 }

@@ -5,7 +5,7 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { NextResponse, type NextRequest } from "next/server";
+import { connection, NextResponse, type NextRequest } from "next/server";
 import { USE_MOCK } from "./mock";
 
 export const SCREEN_COOKIE = "screen";
@@ -72,5 +72,7 @@ export async function isProjector() {
   if (USE_MOCK) return true;
   const secret = process.env.SCREEN_KEY;
   if (!secret) return false;
+  // The expiry check calls Date.now(), which prerendering (and runtime prefetch) can't use.
+  await connection();
   return verifyScreenCookie((await cookies()).get(SCREEN_COOKIE)?.value, secret);
 }
