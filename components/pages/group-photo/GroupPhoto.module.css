@@ -69,6 +69,20 @@
   color: var(--muted);
 }
 
+.error {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  right: var(--space-sm);
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  font: var(--type-meta);
+  color: var(--white);
+  background: var(--ink);
+  border: var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
 .caption {
   padding: var(--space-sm) var(--space-md);
   font: var(--type-meta);

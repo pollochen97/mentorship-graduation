@@ -25,7 +25,9 @@ export function GroupPhoto({ no, label }: PageProps) {
   const { finalPhotoUrl, loading } = useSettings({ live: isProjector });
   // The photo on screen: the latest URL once it has downloaded, so it never shows half-loaded.
   const [shown, setShown] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
+  // The URL that failed to download. Only the latest URL's failure counts: a newer one gets a new try.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const failed = !!finalPhotoUrl && failedUrl === finalPhotoUrl;
   // The photo there was when the page loaded: shown as is. Only photos that arrive later develop.
   const initial = useRef<string | null | undefined>(undefined);
   const developed = useRef<string | null>(null);
@@ -37,12 +39,8 @@ export function GroupPhoto({ no, label }: PageProps) {
     if (!finalPhotoUrl) return;
     let cancelled = false;
     const preload = new Image();
-    preload.onload = () => {
-      if (cancelled) return;
-      setFailed(false);
-      setShown(finalPhotoUrl);
-    };
-    preload.onerror = () => !cancelled && setFailed(true);
+    preload.onload = () => !cancelled && setShown(finalPhotoUrl);
+    preload.onerror = () => !cancelled && setFailedUrl(finalPhotoUrl);
     preload.src = finalPhotoUrl;
     return () => {
       cancelled = true;
@@ -89,6 +87,12 @@ export function GroupPhoto({ no, label }: PageProps) {
           ) : (
             <p className={styles.empty} role="status">
               {status}
+            </p>
+          )}
+          {/* A newer photo failed: keep the old one up, but say so, so nobody takes it for the new one. */}
+          {shown && failed && (
+            <p className={styles.error} role="alert">
+              新照片載入失敗，目前顯示的是上一張
             </p>
           )}
         </div>
