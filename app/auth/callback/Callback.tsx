@@ -51,6 +51,9 @@ export function Callback() {
           登入中…
         </h1>
       )}
+      <p className={styles.policy}>
+        <a href="/privacy">隱私權政策</a>
+      </p>
     </Panel>
   );
 }

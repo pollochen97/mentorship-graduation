@@ -26,6 +26,10 @@ export function Cover() {
       <div className={styles.visual}>
         <Voyage />
       </div>
+      {/* The site's front page has to link to the privacy policy (#56); kept out of the way. */}
+      <a className={styles.privacy} href="/privacy">
+        隱私權政策
+      </a>
     </div>
   );
 }

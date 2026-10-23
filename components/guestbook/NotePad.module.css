@@ -137,6 +137,17 @@
   cursor: pointer;
 }
 
+/* "By signing in you agree to the privacy policy", under the sign-in button (#56). */
+.policy {
+  margin: 0;
+  font: 500 clamp(7px, 0.9cqw, 24px) / 1.3 var(--f-body);
+  opacity: 0.75;
+}
+
+.sheet .policy {
+  font-size: 12px;
+}
+
 /* Signing in, or why this reader can't write (#55): a message and its buttons, centred on the pad. */
 .gate {
   justify-content: center;
