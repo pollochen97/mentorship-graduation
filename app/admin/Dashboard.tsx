@@ -189,7 +189,7 @@ export function Dashboard() {
 
       <PhotoUpload
         current={settings?.finalPhotoUrl ?? null}
-        onUploaded={() => setTick((t) => t + 1)}
+        onChanged={() => setTick((t) => t + 1)}
       />
 
       <section className={styles.card}>
