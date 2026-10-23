@@ -17,7 +17,8 @@ const DEVELOP_MS = 3200;
 
 /**
  * The group photo the admin uploads on the day (#20). Everyone loads it once; only the projector
- * follows photo:final (spec 3.5), swaps the new photo in and develops it.
+ * follows photo:final (spec 3.5), swaps the new photo in and develops it, and settings:update, which
+ * can also take the photo away again (#64).
  */
 export function GroupPhoto({ no, label }: PageProps) {
   const { isProjector } = useBook();
@@ -28,6 +29,13 @@ export function GroupPhoto({ no, label }: PageProps) {
   // The URL that failed to download. Only the latest URL's failure counts: a newer one gets a new try.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const failed = !!finalPhotoUrl && failedUrl === finalPhotoUrl;
+  // When the admin clears the photo (#64), take the old one down too: otherwise it would stay up, and
+  // show again while the next photo downloads.
+  const [lastUrl, setLastUrl] = useState(finalPhotoUrl);
+  if (lastUrl !== finalPhotoUrl) {
+    setLastUrl(finalPhotoUrl);
+    if (!finalPhotoUrl) setShown(null);
+  }
   // The photo there was when the page loaded: shown as is. Only photos that arrive later develop.
   const initial = useRef<string | null | undefined>(undefined);
   const developed = useRef<string | null>(null);

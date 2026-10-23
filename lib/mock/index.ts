@@ -5,6 +5,7 @@
 //   __mock.danmaku("你好")   a danmaku:new          __mock.remove(id)   a danmaku:remove
 //   __mock.note("m1")        a note:new             __mock.hide(id)     a note:hide
 //   __mock.pause() / resume()  settings:update     __mock.photo()      photo:final
+//   __mock.clearPhoto()      the admin clears the group photo (#64): settings:update
 //   __mock.offline() / online()  Realtime drops / comes back; danmaku then only reach pollers
 //   __mock.list("m1")        ids of a guestbook's notes
 //   __mock.auth("none" | "checking" | "error" | "denied" | "allowed")
@@ -228,6 +229,10 @@ const controls = {
   photo(url = `${location.origin}/mock/final-photo.jpg`) {
     settings.finalPhotoUrl = url;
     send("photo:final", { url });
+  },
+  clearPhoto() {
+    settings.finalPhotoUrl = null;
+    send("settings:update", { ...settings });
   },
 };
 
