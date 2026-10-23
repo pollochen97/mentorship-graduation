@@ -2,6 +2,7 @@
 
 import { QRCodeSVG } from "qrcode.react";
 import { useState, useSyncExternalStore } from "react";
+import { cx } from "@/components/ui";
 import styles from "./DanmakuQr.module.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
@@ -19,9 +20,10 @@ function useSiteUrl() {
 
 /**
  * Floats in the bottom-right corner on the projector so guests can scan their way to /danmaku.
- * Collapses to a small tab when it covers something on the page.
+ * Collapses to a small tab when it covers something on the page. `side="left"` moves it to the
+ * bottom-left, e.g. off the guestbook's pad.
  */
-export function DanmakuQr() {
+export function DanmakuQr({ side = "right" }: { side?: "left" | "right" }) {
   const [open, setOpen] = useState(true);
   const site = useSiteUrl();
   if (!site) return null;
@@ -31,7 +33,7 @@ export function DanmakuQr() {
     return (
       <button
         type="button"
-        className={styles.tab}
+        className={cx(styles.tab, styles[side])}
         aria-expanded={false}
         onClick={() => setOpen(true)}
       >
@@ -41,7 +43,7 @@ export function DanmakuQr() {
   }
 
   return (
-    <aside className={styles.card} aria-label="彈幕 QR code">
+    <aside className={cx(styles.card, styles[side])} aria-label="彈幕 QR code">
       <button
         type="button"
         className={styles.close}

@@ -2,7 +2,76 @@
 .board {
   position: absolute;
   inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--page-pad);
   background-color: var(--paper);
   background-image: radial-gradient(rgba(17, 17, 17, 0.16) 1px, transparent 1.3px);
   background-size: 2.4cqw 2.4cqw;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font: var(--type-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.count {
+  margin-left: auto;
+  font: var(--type-meta);
+  white-space: nowrap;
+}
+
+/* Nine notes, then the corner: grid order puts the corner bottom-right. */
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template: repeat(2, minmax(0, 1fr)) / repeat(5, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.empty {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  border: var(--line-w) dashed rgba(17, 17, 17, 0.16);
+}
+
+.hint {
+  margin: 0;
+  padding: var(--space-sm);
+  font: var(--type-small);
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.corner {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+.more {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font: var(--type-label);
+  background: var(--white);
+  border: var(--line);
 }

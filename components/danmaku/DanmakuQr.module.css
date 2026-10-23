@@ -68,3 +68,9 @@
   padding: 6px 10px;
   background: var(--yellow);
 }
+
+/* Bottom-left instead, where the page has something in the bottom-right (the guestbook's pad). */
+.left {
+  right: auto;
+  left: max(16px, env(safe-area-inset-left, 0px) + 16px);
+}
