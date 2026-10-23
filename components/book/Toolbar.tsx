@@ -13,7 +13,8 @@ type ToolbarProps = {
   page: number;
   total: number;
   onJump: (key: string) => void;
-  danmakuOn: boolean;
+  /** Leave undefined off the projector: there is no danmaku to toggle. */
+  danmakuOn?: boolean;
   onToggleDanmaku: () => void;
   onFullscreen: () => void;
 };
@@ -73,13 +74,19 @@ export function Toolbar({
       <span className={styles.counter} aria-live="polite">
         {page} / {total}
       </span>
-      <button type="button" aria-pressed={danmakuOn} onClick={onToggleDanmaku}>
-        彈幕：{danmakuOn ? "開" : "關"}
-      </button>
+      {danmakuOn !== undefined && (
+        <button type="button" aria-pressed={danmakuOn} onClick={onToggleDanmaku}>
+          彈幕：{danmakuOn ? "開" : "關"}
+        </button>
+      )}
       <button type="button" onClick={onFullscreen}>
         全螢幕
       </button>
-      {showTip && <span className={styles.tip}>滾輪、↑↓ 或簡報筆翻頁 · D 開關彈幕 · F 全螢幕</span>}
+      {showTip && (
+        <span className={styles.tip}>
+          滾輪、↑↓ 或簡報筆翻頁{danmakuOn !== undefined && " · D 開關彈幕"} · F 全螢幕
+        </span>
+      )}
     </div>
   );
 }
