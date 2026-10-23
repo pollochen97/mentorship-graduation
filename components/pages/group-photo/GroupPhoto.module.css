@@ -1,0 +1,75 @@
+/* Same split as SectionPage: text on the left, the photo in a white frame on the right. */
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--page-pad);
+}
+
+.side {
+  flex: 0 0 28%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font: var(--type-title);
+  text-wrap: balance;
+}
+
+.text {
+  margin: var(--space-xs) 0 0;
+  font: var(--type-body);
+}
+
+.frame {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border: var(--line);
+  box-shadow: var(--shadow-lg);
+}
+
+.photo {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #e9e4d6;
+  border-bottom: var(--line);
+}
+
+/* contain, not cover: cropping a group photo would cut off the people at the edges. */
+.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-lg);
+  text-align: center;
+  font: var(--type-meta);
+  color: var(--muted);
+}
+
+.caption {
+  padding: var(--space-sm) var(--space-md);
+  font: var(--type-meta);
+}
