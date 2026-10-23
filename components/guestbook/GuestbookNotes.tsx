@@ -12,12 +12,7 @@ import {
 import { useBook } from "@/components/book/BookContext";
 import type { GuestbookSection } from "@/components/book/types";
 import { useNotes } from "@/lib/hooks";
-
-/** Notes per guestbook page; the bottom-right cell holds the pad (spec 3.1). */
-export const NOTES_PER_PAGE = 9;
-
-/** Pages a guestbook needs: one slot per note plus one for the pad. */
-const pagesFor = (notes: number) => Math.max(1, Math.ceil((notes + 1) / NOTES_PER_PAGE));
+import { pagesFor } from "./paging";
 
 function useSection(section: GuestbookSection, live: boolean) {
   const { notes, post, loading, error } = useNotes(section, { live });

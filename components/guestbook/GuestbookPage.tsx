@@ -4,10 +4,11 @@ import { useRef } from "react";
 import type { GuestbookPageProps } from "@/components/book/types";
 import { Tag } from "@/components/ui";
 import { isSectionKey, SECTIONS } from "@/content/sections";
-import { NOTES_PER_PAGE, useGuestbook } from "./GuestbookNotes";
+import { useGuestbook } from "./GuestbookNotes";
 import styles from "./GuestbookPage.module.css";
 import { NoteCard } from "./NoteCard";
 import { NotePad } from "./NotePad";
+import { NOTES_PER_PAGE } from "./paging";
 
 /**
  * One page of a chapter's guestbook (spec 3.1): nine sticky notes in a 5 × 2 grid, oldest first, and

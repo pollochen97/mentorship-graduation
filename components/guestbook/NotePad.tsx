@@ -81,10 +81,13 @@ function useDraft(post: Post) {
 
 type Draft = ReturnType<typeof useDraft>;
 
-/** Enter sends; Shift+Enter is ignored (notes are one line once stored). Never while an IME is composing. */
+/**
+ * Enter sends; Shift+Enter is ignored (notes are one line once stored). While an IME is composing,
+ * Enter picks the candidate: leave it to the IME, untouched (keyCode 229 for older Safari).
+ */
 function onKeyDown(e: KeyboardEvent<HTMLFormElement>) {
   if (e.key !== "Enter") return;
-  if (e.nativeEvent.isComposing || e.keyCode === 229) return e.preventDefault();
+  if (e.nativeEvent.isComposing || e.keyCode === 229) return;
   if (e.target instanceof HTMLTextAreaElement) {
     e.preventDefault();
     if (!e.shiftKey) e.currentTarget.requestSubmit();
