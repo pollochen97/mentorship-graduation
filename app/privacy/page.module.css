@@ -49,6 +49,7 @@
   font-weight: 700;
 }
 
-.back a {
+.back a,
+.list a {
   color: var(--ink);
 }

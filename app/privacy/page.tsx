@@ -50,7 +50,10 @@ export default function PrivacyPage() {
         <ul className={styles.list}>
           <li>資料存放在 Supabase（資料庫）和 Vercel（網站主機）。</li>
           <li>活動結束、留言板封存後，會刪除 Google 登入的帳號資料。</li>
-          <li>在那之前，如果想刪除自己的留言或帳號資料，請聯絡 ENG曼陀號的工作人員。</li>
+          <li>
+            在那之前，如果想刪除自己的留言或帳號資料，或對這份政策有任何問題，請寄信到{" "}
+            <a href="mailto:chichichen97@gmail.com">chichichen97@gmail.com</a>。
+          </li>
         </ul>
 
         <p className={styles.back}>
