@@ -1,9 +1,31 @@
-import { Placeholder } from "@/components/book/Placeholder";
-import type { PageProps } from "@/components/book/types";
+import { Stamp } from "@/components/ui";
+import { SAILORS } from "@/content/sailors";
+import styles from "./cover/Cover.module.css";
+import { Voyage } from "./cover/Voyage";
 
-// Empty shell from #3; #8 replaces this file.
-export function Cover({ no, label, pageIndex, pageCount }: PageProps) {
+/**
+ * The cover (spec 2, chapter 01): the site's title and the date on the left, readable from the back
+ * of the room, and the main visual on the right. Wording from flipbook-demo.html.
+ */
+export function Cover() {
   return (
-    <Placeholder no={no} label={label} issue={8} pageIndex={pageIndex} pageCount={pageCount} />
+    <div className={styles.page}>
+      <div className={styles.side}>
+        <span className={styles.kicker}>LOGBOOK · VOYAGE 2026</span>
+        <h1 className={styles.title}>
+          ENG曼陀號
+          <br />
+          結業分享
+        </h1>
+        <p className={styles.subtitle}>我們的四個月航程</p>
+        <Stamp label="Final day" tilt={-5} className={styles.date}>
+          11/07 Sat.
+        </Stamp>
+        <span className={styles.voyageLog}>JUN — OCT · {SAILORS.length} 位學員</span>
+      </div>
+      <div className={styles.visual}>
+        <Voyage />
+      </div>
+    </div>
   );
 }
