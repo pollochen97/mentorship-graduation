@@ -57,6 +57,17 @@
   box-shadow: var(--shadow-md);
 }
 
+/* A front-page link to the privacy policy (#56): as small as stays readable, in the bottom margin. */
+.privacy {
+  position: absolute;
+  /* The page's side padding (--page-pad holds all three sides, so it can't be used here). */
+  right: 3.6cqw;
+  bottom: 0.35cqw;
+  font: 500 max(9px, 0.55cqw) / 1 var(--f-mono);
+  color: var(--ink);
+  opacity: 0.55;
+}
+
 .visual {
   flex: 1;
   min-width: 0;

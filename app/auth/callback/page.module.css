@@ -38,3 +38,12 @@
   text-decoration: none;
   box-shadow: var(--shadow-sm);
 }
+
+.policy {
+  margin: 20px 0 0;
+  font-size: 0.8rem;
+}
+
+.policy a {
+  color: var(--muted);
+}

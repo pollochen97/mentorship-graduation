@@ -165,8 +165,18 @@ function NoteForm({
         <button type="button" className={styles.link} onClick={onSignOut}>
           登出
         </button>
+        <PolicyLink />
       </p>
     </form>
+  );
+}
+
+/** The privacy policy (#56), in a new tab so the reader keeps their place in the book. */
+function PolicyLink() {
+  return (
+    <a className={styles.link} href="/privacy" target="_blank" rel="noopener">
+      隱私權政策
+    </a>
   );
 }
 
@@ -194,6 +204,8 @@ function Gate({ member, variant, tone }: { member: Member; variant: Variant; ton
   const app = useSyncExternalStore(noSubscribe, inAppBrowser, () => null);
   let text = "載入中…";
   let actions = null;
+  // Where the reader decides to sign in, so the privacy policy is one tap away (#56).
+  let policy = false;
   if (member.status === "signedOut" && app === "line") {
     text = "LINE 裡無法用 Google 登入，請改用瀏覽器開啟。沒反應的話，從右上角選單改用瀏覽器開啟。";
     actions = <Button onClick={openInBrowser}>用瀏覽器開啟</Button>;
@@ -202,6 +214,7 @@ function Gate({ member, variant, tone }: { member: Member; variant: Variant; ton
   } else if (member.status === "signedOut") {
     text = "留言限 ENG 夥伴，請先用 Google 登入。";
     actions = <Button onClick={signIn}>用 Google 登入</Button>;
+    policy = true;
   } else if (member.status === "signedIn" && member.access === "checking") {
     text = `正在確認 ${member.email} 是否在 ENG 名單內…`;
   } else if (member.status === "signedIn" && member.access === "error") {
@@ -231,6 +244,12 @@ function Gate({ member, variant, tone }: { member: Member; variant: Variant; ton
         {text}
       </p>
       {actions && <div className={styles.actions}>{actions}</div>}
+      {policy && (
+        <p className={styles.policy}>
+          登入即表示同意
+          <PolicyLink />
+        </p>
+      )}
     </div>
   );
 }
