@@ -14,6 +14,12 @@
   min-width: 0;
 }
 
+/* Monthly meetings put their full theme here, which can be longer than the column. */
+.side .tag {
+  white-space: normal;
+  line-height: 1.6;
+}
+
 .title {
   margin: 0;
   font: var(--type-title);
@@ -23,6 +29,15 @@
 .text {
   margin: var(--space-xs) 0 0;
   font: var(--type-body);
+}
+
+.outline {
+  display: grid;
+  gap: var(--space-xs);
+  margin: var(--space-xs) 0 0;
+  padding-left: 1.2em;
+  font: var(--type-body);
+  line-height: 1.5;
 }
 
 .main {
