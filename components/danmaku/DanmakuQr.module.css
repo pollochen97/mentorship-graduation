@@ -1,15 +1,17 @@
-/* Sized in vw, not cqw: it sits outside the book. Kept small so it covers less of the page, but it
-   must still scan from the back of the room (check at the rehearsal, #22); collapse it when it
-   covers something. */
+/* Sized in vw, not cqw: it sits outside the book. --qr-scale comes from the size button (小 0.7,
+   中 0.85, 大 1): small covers less of the page, large scans from further back (check at the
+   rehearsal, #22). Collapse it when it covers something. */
 .card {
+  --qr-scale: 0.7;
   position: fixed;
   z-index: 160;
   left: max(12px, env(safe-area-inset-left, 0px) + 12px);
   bottom: max(12px, env(safe-area-inset-bottom, 0px) + 12px);
   display: grid;
   justify-items: center;
-  gap: 0.28vw;
-  padding: 0.42vw 0.42vw 0.35vw;
+  gap: calc(0.4vw * var(--qr-scale));
+  padding: calc(0.6vw * var(--qr-scale));
+  padding-bottom: calc(0.5vw * var(--qr-scale));
   color: var(--ink);
   background: var(--yellow);
   border: 2px solid var(--ink);
@@ -18,22 +20,23 @@
 
 .title {
   margin: 0;
-  font: 700 clamp(10px, 0.77vw, 20px) / 1.2 var(--f-display);
+  font: 700 calc(clamp(13px, 1.1vw, 28px) * var(--qr-scale)) / 1.2 var(--f-display);
 }
 
 /* The QR code keeps its own white quiet zone (marginSize), which scanners need. */
 .code {
   display: block;
-  width: clamp(84px, 7.7vw, 196px);
+  width: calc(clamp(120px, 11vw, 280px) * var(--qr-scale));
   height: auto;
   border: 2px solid var(--ink);
 }
 
 .url {
   margin: 0;
-  font: 700 clamp(8px, 0.53vw, 13px) / 1.2 var(--f-mono);
+  font: 700 calc(clamp(10px, 0.75vw, 18px) * var(--qr-scale)) / 1.2 var(--f-mono);
 }
 
+.size,
 .close,
 .tab {
   font: 700 11px var(--f-body);
@@ -45,20 +48,29 @@
   cursor: pointer;
 }
 
+.size:active,
 .close:active,
 .tab:active {
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--ink);
 }
 
+.size,
 .close {
   position: absolute;
   top: -10px;
-  right: -10px;
   width: 20px;
   height: 20px;
   padding: 0;
   line-height: 1;
+}
+
+.close {
+  right: -10px;
+}
+
+.size {
+  right: 16px;
 }
 
 .tab {
