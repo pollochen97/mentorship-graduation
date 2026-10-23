@@ -3,6 +3,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { DanmakuLayer } from "@/components/danmaku/DanmakuLayer";
 import { DanmakuQr } from "@/components/danmaku/DanmakuQr";
+import { GuestbookNotes } from "@/components/guestbook/GuestbookNotes";
 import { GuestbookPage } from "@/components/guestbook/GuestbookPage";
 import { cx } from "@/components/ui";
 import { BookContext, PageContext } from "./BookContext";
@@ -281,69 +282,74 @@ export function BookShell({ isProjector }: { isProjector: boolean }) {
   const n = leaves.length;
   return (
     <BookContext value={book}>
-      <div className={styles.stage}>
-        <Toolbar
-          chapters={chapters}
-          currentChapter={leaves[cur].chapter.key}
-          page={cur + 1}
-          total={n}
-          onJump={goToChapter}
-          danmakuOn={isProjector ? danmakuOn : undefined}
-          onToggleDanmaku={() => setDanmakuOn(!danmakuOn)}
-          onFullscreen={toggleFullscreen}
-        />
-        <div
-          className={cx(styles.book, instant && styles.instant)}
-          tabIndex={0}
-          aria-label="航海日誌。用滾輪、方向鍵或簡報筆翻頁"
-          aria-roledescription="翻頁書"
-          onPointerDown={(e) => {
-            if (e.pointerType !== "mouse") swipe.current = { y: e.clientY, pointerId: e.pointerId };
-          }}
-          onPointerUp={(e) => {
-            const start = swipe.current;
-            swipe.current = null;
-            if (!start || start.pointerId !== e.pointerId) return;
-            const dy = e.clientY - start.y;
-            if (Math.abs(dy) > 40) step(dy < 0 ? 1 : -1); // swipe up = next page
-          }}
-          onPointerCancel={() => (swipe.current = null)}
-        >
-          {leaves.map((leaf, k) => {
-            const moving = flip !== null && k >= flip.from && k < flip.to;
-            let delay = 0;
-            if (moving) {
-              const order = flip.forward ? k - flip.from : flip.to - 1 - k;
-              delay = order * Math.min(90, 600 / (flip.to - flip.from));
-            }
-            const style: CSSProperties = {
-              zIndex: (k < cur ? k + 1 : n - k) + (moving ? 400 : 0),
-              transitionDelay: delay ? `${delay}ms` : undefined,
-            };
-            return (
-              <div
-                key={leaf.id}
-                className={cx(styles.leaf, k < cur && styles.flipped)}
-                style={style}
-                inert={k !== cur}
-              >
-                <LeafContent leaf={leaf} active={k === cur} />
-              </div>
-            );
-          })}
-          <div className={styles.rings} aria-hidden="true">
-            {Array.from({ length: RINGS }, (_, i) => (
-              <i key={i} />
-            ))}
+      {/* Loads the guestbooks once for all their pages, and tells the book how many pages they need. */}
+      <GuestbookNotes>
+        <div className={styles.stage}>
+          <Toolbar
+            chapters={chapters}
+            currentChapter={leaves[cur].chapter.key}
+            page={cur + 1}
+            total={n}
+            onJump={goToChapter}
+            danmakuOn={isProjector ? danmakuOn : undefined}
+            onToggleDanmaku={() => setDanmakuOn(!danmakuOn)}
+            onFullscreen={toggleFullscreen}
+          />
+          <div
+            className={cx(styles.book, instant && styles.instant)}
+            tabIndex={0}
+            aria-label="航海日誌。用滾輪、方向鍵或簡報筆翻頁"
+            aria-roledescription="翻頁書"
+            onPointerDown={(e) => {
+              if (e.pointerType !== "mouse")
+                swipe.current = { y: e.clientY, pointerId: e.pointerId };
+            }}
+            onPointerUp={(e) => {
+              const start = swipe.current;
+              swipe.current = null;
+              if (!start || start.pointerId !== e.pointerId) return;
+              const dy = e.clientY - start.y;
+              if (Math.abs(dy) > 40) step(dy < 0 ? 1 : -1); // swipe up = next page
+            }}
+            onPointerCancel={() => (swipe.current = null)}
+          >
+            {leaves.map((leaf, k) => {
+              const moving = flip !== null && k >= flip.from && k < flip.to;
+              let delay = 0;
+              if (moving) {
+                const order = flip.forward ? k - flip.from : flip.to - 1 - k;
+                delay = order * Math.min(90, 600 / (flip.to - flip.from));
+              }
+              const style: CSSProperties = {
+                zIndex: (k < cur ? k + 1 : n - k) + (moving ? 400 : 0),
+                transitionDelay: delay ? `${delay}ms` : undefined,
+              };
+              return (
+                <div
+                  key={leaf.id}
+                  className={cx(styles.leaf, k < cur && styles.flipped)}
+                  style={style}
+                  inert={k !== cur}
+                >
+                  <LeafContent leaf={leaf} active={k === cur} />
+                </div>
+              );
+            })}
+            <div className={styles.rings} aria-hidden="true">
+              {Array.from({ length: RINGS }, (_, i) => (
+                <i key={i} />
+              ))}
+            </div>
           </div>
+          {isProjector && (
+            <>
+              <DanmakuLayer />
+              {/* Off the guestbook's pad, which sits in the bottom-right corner. */}
+              <DanmakuQr side={leaves[cur].guestbook ? "left" : "right"} />
+            </>
+          )}
         </div>
-        {isProjector && (
-          <>
-            <DanmakuLayer />
-            <DanmakuQr />
-          </>
-        )}
-      </div>
+      </GuestbookNotes>
     </BookContext>
   );
 }
