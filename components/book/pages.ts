@@ -5,12 +5,12 @@ import { Final } from "@/components/pages/Final";
 import { GroupPhoto } from "@/components/pages/GroupPhoto";
 import { Sailors } from "@/components/pages/Sailors";
 import { SectionPage } from "@/components/pages/SectionPage";
-import { Staff } from "@/components/pages/Staff";
+import { Staff, STAFF_PAGES } from "@/components/pages/Staff";
 import type { Chapter } from "./types";
 
 export const CHAPTERS: Chapter[] = [
   { key: "cover", label: "封面", component: Cover },
-  { key: "staff", label: "工作人員", component: Staff },
+  { key: "staff", label: "工作人員", component: Staff, pageCount: STAFF_PAGES },
   { key: "sailors", label: "學員介紹", component: Sailors, pageCount: 2 },
   { key: "audition", label: "海選", component: SectionPage },
   { key: "welcome", label: "相見歡", component: SectionPage },

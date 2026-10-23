@@ -6,7 +6,8 @@ import { avatarOf, type AvatarIcon } from "./avatars";
 import styles from "./Sailors.module.css";
 
 // Drawn on a 64 × 64 grid in ink with white fills, like the rest of the book's line work.
-const ICONS: Record<AvatarIcon, ReactNode> = {
+// Also used by the staff page (#9), which picks one by role.
+export const ICONS: Record<AvatarIcon, ReactNode> = {
   boat: (
     <>
       <path d="M32 10v32M34 14l16 24H34zM30 20 16 38h14z" fill="white" />
