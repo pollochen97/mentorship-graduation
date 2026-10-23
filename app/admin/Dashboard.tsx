@@ -209,7 +209,12 @@ export function Dashboard() {
               key={s.key}
               type="button"
               aria-pressed={section === s.key}
-              onClick={() => setSection(s.key)}
+              onClick={() => {
+                if (s.key === section) return;
+                // Clear the old list so its buttons can't act on the previous guestbook meanwhile.
+                setNotes(null);
+                setSection(s.key);
+              }}
             >
               {s.label}
             </button>

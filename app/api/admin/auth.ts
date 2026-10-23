@@ -11,6 +11,18 @@ import { errorResponse } from "@/lib/http";
 
 export const ADMIN_COOKIE = "admin";
 const MAX_AGE_S = 12 * 60 * 60;
+/**
+ * Serverless functions run in parallel and keep no memory between requests, so failed logins can't
+ * be counted cheaply, and a lockout would let anyone on the venue Wi-Fi lock the admin out. Instead
+ * the password has to be long enough that guessing it online is hopeless, however fast it's tried.
+ */
+export const MIN_PASSWORD_LENGTH = 16;
+
+/** ADMIN_PASSWORD, or null when it is missing or too short: then nobody can log in. */
+export function adminSecret() {
+  const secret = process.env.ADMIN_PASSWORD;
+  return secret && secret.length >= MIN_PASSWORD_LENGTH ? secret : null;
+}
 
 /**
  * The cookie value: `<expires>.<HMAC-SHA256 of expires, keyed by ADMIN_PASSWORD>`. The expiry is
@@ -37,7 +49,7 @@ export function verifyAdminCookie(value: string | undefined, secret: string, now
 
 /** Compares hashes, so the check takes as long whatever the length of the guess. */
 export function checkPassword(guess: string) {
-  const secret = process.env.ADMIN_PASSWORD;
+  const secret = adminSecret();
   if (!secret) return false;
   const hash = (s: string) => createHash("sha256").update(s).digest();
   return timingSafeEqual(hash(guess), hash(secret));
@@ -53,7 +65,7 @@ const cookieOptions = {
 } as const;
 
 export function setAdminCookie(response: NextResponse) {
-  const secret = process.env.ADMIN_PASSWORD!;
+  const secret = adminSecret()!;
   const expires = Math.floor(Date.now() / 1000) + MAX_AGE_S;
   response.cookies.set(ADMIN_COOKIE, `${expires}.${sign(secret, expires)}`, {
     ...cookieOptions,
@@ -66,7 +78,7 @@ export function clearAdminCookie(response: NextResponse) {
 }
 
 function isValid(value: string | undefined) {
-  const secret = process.env.ADMIN_PASSWORD;
+  const secret = adminSecret();
   return !!secret && verifyAdminCookie(value, secret);
 }
 
