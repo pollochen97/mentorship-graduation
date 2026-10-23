@@ -5,6 +5,7 @@ import { Placeholder } from "@/components/book/Placeholder";
 import type { PageProps } from "@/components/book/types";
 import { PhotoGrid, Stamp, Tag } from "@/components/ui";
 import { isSectionKey, SECTIONS } from "@/content/sections";
+import { PhotoRows } from "./section/PhotoRows";
 import styles from "./section/SectionPage.module.css";
 import { Stats } from "./section/Stats";
 import { Steps } from "./section/Steps";
@@ -42,7 +43,11 @@ export function SectionPage({ chapter, label, no, pageIndex, pageCount }: PagePr
       <div className={styles.main}>
         {s.steps && <Steps steps={s.steps} />}
         <div className={styles.photos}>
-          <PhotoGrid layout={s.layout} photos={near ? s.photos : []} />
+          {s.photos.length === 0 ? (
+            <PhotoGrid layout="grid2" photos={[]} />
+          ) : (
+            near && <PhotoRows photos={s.photos} />
+          )}
         </div>
       </div>
     </div>
