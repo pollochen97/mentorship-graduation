@@ -77,6 +77,13 @@ test("blocks links", () => {
     "go.java",
     "files.zip",
     "x.readme.md",
+    "網址.ai",
+    "例子.dev",
+    "看 例子.dev 喔",
+    "例子.台灣",
+    "例子．台湾",
+    "購物.公司",
+    "example.台灣",
   ]) {
     assert.equal(check(text), true, text);
   }
@@ -93,6 +100,9 @@ test("doesn't take sentences or numbers for links", () => {
     "v1.0",
     "ok...yes",
     "Mr.Smith 你好",
+    "謝謝大家。台灣加油",
+    "畢業了。台灣",
+    "加油.好嗎",
   ]) {
     assert.equal(check(text), false, text);
   }

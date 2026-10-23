@@ -1,5 +1,6 @@
 // Content filter for everything visitors post (#17, spec 6.3): normalise the text, then refuse
 // profanity and links. Shared by POST /api/danmaku and POST /api/notes.
+import { domainToASCII } from "node:url";
 import { z } from "zod";
 import { TLDS } from "./tlds.ts";
 
@@ -106,10 +107,14 @@ const ALLOWED = [
 ];
 
 // Links: the scheme or www. even when spaced out; any name ending in a real TLD (example.dev,
-// x.y.shop), so file names like Next.js and index.html pass; and spaced-out domains ("example . com")
-// for common TLDs only, since with spaces removed "Thank you. Love you" would end in .love.
+// x.y.shop, 例子.台灣), so file names like Next.js and index.html pass; and spaced-out domains
+// ("example . com") for common TLDs only, since with spaces removed "Thank you. Love you" would end
+// in .love.
 const URL_SCHEME = /https?:|www\./;
-const DOTTED_NAME = /[a-z0-9-]+(?:\.[a-z0-9-]+)+/g;
+const ASCII_NAME = /[a-z0-9-]+(?:\.[a-z0-9-]+)+/g;
+// Names with other letters too (例子.台灣, 網址.ai). Only "." separates their parts: browsers also
+// accept 。, but it ends Chinese sentences, and "畢業快樂。Love you all" isn't a link.
+const UNICODE_NAME = /[\p{L}\p{N}\p{M}-]+(?:\.[\p{L}\p{N}\p{M}-]+)+/gu;
 const SPACED_DOMAIN = /\.(?:com|net|org|tw|io|cc|me|co|xyz|top|link|ly|gg|app|site|info|biz)\b/;
 
 // Real TLDs that are also common file extensions: let through only as these well-known file names
@@ -120,11 +125,12 @@ const FILE_NAMES = new Set([
   ...["lib", "mod", "build", "install", "run", "start"],
 ]);
 
-/** Whether `text` has a name ending in a real TLD that isn't a well-known file name. */
-function hasDomain(text: string) {
-  for (const [name] of text.matchAll(DOTTED_NAME)) {
+/** Whether `text` has a name (matched by `names`) ending in a real TLD that isn't a known file name. */
+function hasDomain(text: string, names: RegExp) {
+  for (const [name] of text.matchAll(names)) {
     const dot = name.lastIndexOf(".");
-    const tld = name.slice(dot + 1);
+    // 台灣 → xn--kpry57d, as TLDS lists it.
+    const tld = domainToASCII(name.slice(dot + 1));
     if (!TLDS.has(tld)) continue;
     if (FILE_TLDS.has(tld) && FILE_NAMES.has(name.slice(0, dot))) continue;
     return true;
@@ -134,10 +140,18 @@ function hasDomain(text: string) {
 
 /** Whether normalised text contains profanity or a link (spec 6.3, steps 3 and 4). */
 export function isForbidden(text: string) {
-  // NFKC also folds look-alikes such as 𝐟𝐮𝐜𝐤 and ①; browsers accept 。 as a dot in domains.
-  const lower = text.normalize("NFKC").toLowerCase().replaceAll("。", ".");
-  const unspaced = lower.replace(/\s+/gu, "");
-  if (URL_SCHEME.test(unspaced) || SPACED_DOMAIN.test(unspaced) || hasDomain(lower)) return true;
+  // NFKC also folds look-alikes such as 𝐟𝐮𝐜𝐤 and ①, and ．／｡ into . and 。.
+  const lower = text.normalize("NFKC").toLowerCase();
+  // Browsers accept 。 as a dot in domains; see UNICODE_NAME for why it only counts here.
+  const dotted = lower.replaceAll("。", ".");
+  const unspaced = dotted.replace(/\s+/gu, "");
+  if (
+    URL_SCHEME.test(unspaced) ||
+    SPACED_DOMAIN.test(unspaced) ||
+    hasDomain(dotted, ASCII_NAME) ||
+    hasDomain(lower, UNICODE_NAME)
+  )
+    return true;
   const squashed = lower.replace(/[\s\p{P}\p{S}]/gu, "");
   return BLOCKED.some((word) => {
     for (let i = squashed.indexOf(word); i !== -1; i = squashed.indexOf(word, i + 1)) {
