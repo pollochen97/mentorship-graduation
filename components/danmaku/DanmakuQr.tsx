@@ -2,7 +2,6 @@
 
 import { QRCodeSVG } from "qrcode.react";
 import { useState, useSyncExternalStore } from "react";
-import { cx } from "@/components/ui";
 import styles from "./DanmakuQr.module.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
@@ -19,11 +18,11 @@ function useSiteUrl() {
 }
 
 /**
- * Floats in the bottom-right corner on the projector so guests can scan their way to /danmaku.
- * Collapses to a small tab when it covers something on the page. `side="left"` moves it to the
- * bottom-left, e.g. off the guestbook's pad.
+ * Floats in the bottom-left corner on the projector so guests can scan their way to /danmaku. Always
+ * the same corner, so it doesn't jump between pages (pages keep their own controls bottom-right).
+ * Collapses to a small tab when it covers something on the page.
  */
-export function DanmakuQr({ side = "right" }: { side?: "left" | "right" }) {
+export function DanmakuQr() {
   const [open, setOpen] = useState(true);
   const site = useSiteUrl();
   if (!site) return null;
@@ -33,17 +32,17 @@ export function DanmakuQr({ side = "right" }: { side?: "left" | "right" }) {
     return (
       <button
         type="button"
-        className={cx(styles.tab, styles[side])}
+        className={styles.tab}
         aria-expanded={false}
         onClick={() => setOpen(true)}
       >
-        掃碼發彈幕
+        掃描發送彈幕
       </button>
     );
   }
 
   return (
-    <aside className={cx(styles.card, styles[side])} aria-label="彈幕 QR code">
+    <aside className={styles.card} aria-label="彈幕 QR code">
       <button
         type="button"
         className={styles.close}
@@ -53,7 +52,7 @@ export function DanmakuQr({ side = "right" }: { side?: "left" | "right" }) {
       >
         −
       </button>
-      <p className={styles.title}>掃碼發彈幕</p>
+      <p className={styles.title}>掃描發送彈幕</p>
       <QRCodeSVG
         value={url}
         size={256}

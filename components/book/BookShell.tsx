@@ -344,8 +344,7 @@ export function BookShell({ isProjector }: { isProjector: boolean }) {
           {isProjector && (
             <>
               <DanmakuLayer />
-              {/* Off the guestbook's pad, which sits in the bottom-right corner. */}
-              <DanmakuQr side={leaves[cur].guestbook ? "left" : "right"} />
+              <DanmakuQr />
             </>
           )}
         </div>
