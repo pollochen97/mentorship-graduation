@@ -1,0 +1,127 @@
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--page-pad);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.title {
+  margin: 0;
+  font: var(--type-title);
+}
+
+.hint {
+  margin: 0 0 0 auto;
+  font: var(--type-body);
+  color: var(--muted);
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: var(--space-md);
+}
+
+.card {
+  display: grid;
+  grid-template: minmax(0, 1fr) auto / minmax(0, 1fr) auto;
+  gap: var(--space-sm);
+  min-height: 0;
+  padding: var(--space-sm);
+  text-align: left;
+  background: var(--white);
+  border: var(--line);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+
+.card:active {
+  transform: translate(0.15cqw, 0.15cqw);
+  box-shadow: none;
+}
+
+.photo {
+  position: relative;
+  overflow: hidden;
+  background: #e9e4d6;
+  border: var(--line);
+}
+
+.img {
+  object-fit: cover;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: var(--type-label);
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 0.8cqw,
+    rgba(17, 17, 17, 0.07) 0.8cqw 1.6cqw
+  );
+}
+
+.caption {
+  display: grid;
+  gap: 0.3cqw;
+  min-width: 0;
+}
+
+.team {
+  font: var(--type-meta);
+  color: var(--muted);
+}
+
+.name {
+  font: 700 clamp(11px, 2cqw, 51px) / 1.25 var(--f-display);
+  overflow-wrap: anywhere;
+}
+
+.qr {
+  grid-row: 1 / -1;
+  grid-column: 2;
+  align-self: center;
+  display: block;
+  width: 13cqw;
+  height: auto;
+}
+
+/* Inside the modal, cqw is relative to the modal (it is its own size container). */
+.big {
+  display: grid;
+  justify-items: center;
+  gap: 1.6cqw;
+}
+
+.bigQr {
+  display: block;
+  width: min(60vh, 70cqw);
+  height: auto;
+  border: max(2px, 0.25cqw) solid var(--ink);
+}
+
+.link {
+  font: 700 clamp(14px, 1.8cqw, 22px) / 1.3 var(--f-mono);
+  color: var(--ink);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
