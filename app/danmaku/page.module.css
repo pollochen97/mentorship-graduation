@@ -1,0 +1,100 @@
+.main {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  padding: 24px 20px;
+}
+
+.kicker {
+  margin: 0;
+  font: 700 0.8rem / 1.3 var(--f-mono);
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.title {
+  margin: 4px 0 0;
+  font: 700 1.75rem / 1.2 var(--f-display);
+}
+
+.lead {
+  margin: 8px 0 20px;
+  color: var(--muted);
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 700;
+}
+
+.count {
+  font: 500 0.85rem var(--f-mono);
+  color: var(--muted);
+}
+
+.over {
+  color: var(--ink);
+  background: var(--pink);
+  padding: 0 4px;
+}
+
+.input {
+  width: 100%;
+  /* Below 16px, iOS Safari zooms the page in when the field gets focus. */
+  font-size: 1rem;
+  padding: 10px 12px;
+  border: var(--line);
+  border-radius: 0;
+  background: var(--white);
+}
+
+.submit {
+  width: 100%;
+  font-size: 1.1rem;
+}
+
+.notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: var(--line);
+  font-weight: 700;
+}
+
+.notice:empty {
+  display: none;
+}
+
+.ok {
+  background: var(--mint);
+}
+
+.error {
+  background: var(--pink);
+}
+
+.rules {
+  margin: 24px 0 0;
+  padding: 16px 0 0 1.2em;
+  border-top: 2px dashed var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
