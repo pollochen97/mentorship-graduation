@@ -1,9 +1,81 @@
-import { Placeholder } from "@/components/book/Placeholder";
+import Image from "next/image";
 import type { PageProps } from "@/components/book/types";
+import { Tag, type Accent } from "@/components/ui";
+import { STAFF } from "@/content/staff";
+import type { StaffMember } from "@/content/types";
+import { ICONS } from "./sailors/Avatar";
+import type { AvatarIcon } from "./sailors/avatars";
+import styles from "./staff/Staff.module.css";
 
-// Empty shell from #3; #9 replaces this file.
-export function Staff({ no, label, pageIndex, pageCount }: PageProps) {
+/** People per page: 4 × 2 cards. More than this and the chapter takes another page. */
+const PER_PAGE = 8;
+/** For the page registry (pages.ts), so a longer list gets its pages without touching it again. */
+export const STAFF_PAGES = Math.max(1, Math.ceil(STAFF.length / PER_PAGE));
+
+/** Each role gets its own label colour and, for people without a photo, its own sea motif. */
+const ROLES: Record<string, { tone: Accent; icon: AvatarIcon }> = {
+  船長: { tone: "yellow", icon: "wheel" },
+  引水人: { tone: "blue", icon: "lighthouse" },
+  助教: { tone: "mint", icon: "compass" },
+  客座講師: { tone: "pink", icon: "gull" },
+};
+const OTHER_ROLE = { tone: "yellow", icon: "anchor" } as const;
+
+function Portrait({ member }: { member: StaffMember }) {
+  const { tone, icon } = ROLES[member.role] ?? OTHER_ROLE;
   return (
-    <Placeholder no={no} label={label} issue={9} pageIndex={pageIndex} pageCount={pageCount} />
+    <span className={styles.portrait} data-tone={tone}>
+      {member.photo ? (
+        <Image src={member.photo} alt="" fill sizes="22vw" className={styles.photo} />
+      ) : (
+        <svg
+          viewBox="0 0 64 64"
+          className={styles.icon}
+          aria-hidden
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          {ICONS[icon]}
+        </svg>
+      )}
+    </span>
+  );
+}
+
+/** 工作人員: role, name and a one-line intro for everyone in content/staff.ts, 8 to a page. */
+export function Staff({ no, label, pageIndex, pageCount }: PageProps) {
+  const onPage = STAFF.slice(pageIndex * PER_PAGE, (pageIndex + 1) * PER_PAGE);
+  // If anyone on the page has an intro, every card keeps room for one, so the portraits line up.
+  const withIntros = onPage.some((member) => member.intro);
+
+  return (
+    <div className={styles.page}>
+      <header className={styles.head}>
+        <Tag no={no} tone="mint">
+          STAFF
+        </Tag>
+        <h2 className={styles.title}>{label}</h2>
+        <p className={styles.hint}>
+          {STAFF.length} 位工作人員
+          {pageCount > 1 && ` · ${pageIndex + 1} / ${pageCount}`}
+        </p>
+      </header>
+      <ul className={styles.grid}>
+        {onPage.map((member) => (
+          <li key={`${member.role}-${member.name}`} className={styles.card}>
+            <Portrait member={member} />
+            <div className={styles.body}>
+              <span className={styles.role} data-tone={(ROLES[member.role] ?? OTHER_ROLE).tone}>
+                {member.role}
+              </span>
+              <span className={styles.name}>{member.name}</span>
+              {withIntros && <p className={styles.intro}>{member.intro}</p>}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
