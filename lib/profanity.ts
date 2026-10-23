@@ -108,15 +108,37 @@ const ALLOWED = [
 // spaced out, and spaced-out domains ("example . com") for common TLDs only: with spaces removed, any
 // TLD would also catch two sentences ("Thank you. Love you").
 const URL_SCHEME = /https?:|www\./;
-const DOMAIN = /[a-z0-9]\.[a-z]{2,63}(?![a-z0-9])/;
+const DOTTED_NAME = /[a-z0-9-]+(?:\.[a-z0-9-]+)+/g;
 const SPACED_DOMAIN = /\.(?:com|net|org|tw|io|cc|me|co|xyz|top|link|ly|gg|app|site|info|biz)\b/;
+
+// File names and tech names (Next.js, README.md, next.config.ts) end like a domain but aren't links.
+// A few are real TLDs too (md, py, sh, rs), but nobody advertises on them.
+const FILE_EXTENSIONS = new Set(
+  [
+    "js jsx ts tsx mjs cjs json html htm css scss vue svelte",
+    "md mdx txt csv yml yaml toml xml env lock log sql",
+    "py rb go rs java kt swift dart php sh cpp hpp",
+    "png jpg jpeg gif svg webp mp3 mp4 pdf docx xlsx pptx",
+  ]
+    .join(" ")
+    .split(" "),
+);
+
+/** Whether `text` has a dotted name whose last part could be a TLD and isn't a file extension. */
+function hasDomain(text: string) {
+  for (const [name] of text.matchAll(DOTTED_NAME)) {
+    const last = name.slice(name.lastIndexOf(".") + 1);
+    if (/^[a-z]{2,63}$/.test(last) && !FILE_EXTENSIONS.has(last)) return true;
+  }
+  return false;
+}
 
 /** Whether normalised text contains profanity or a link (spec 6.3, steps 3 and 4). */
 export function isForbidden(text: string) {
   // NFKC also folds look-alikes such as 𝐟𝐮𝐜𝐤 and ①; browsers accept 。 as a dot in domains.
   const lower = text.normalize("NFKC").toLowerCase().replaceAll("。", ".");
   const unspaced = lower.replace(/\s+/gu, "");
-  if (URL_SCHEME.test(unspaced) || SPACED_DOMAIN.test(unspaced) || DOMAIN.test(lower)) return true;
+  if (URL_SCHEME.test(unspaced) || SPACED_DOMAIN.test(unspaced) || hasDomain(lower)) return true;
   const squashed = lower.replace(/[\s\p{P}\p{S}]/gu, "");
   return BLOCKED.some((word) => {
     for (let i = squashed.indexOf(word); i !== -1; i = squashed.indexOf(word, i + 1)) {

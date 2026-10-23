@@ -66,6 +66,10 @@ test("blocks links", () => {
     "x.photography/abc",
     "example。shop",
     "example｡xyz",
+    "openai.ai",
+    "evil.com.tw",
+    "socket.io",
+    "evil.com-",
   ]) {
     assert.equal(check(text), true, text);
   }
@@ -81,6 +85,24 @@ test("doesn't take sentences or numbers for links", () => {
     "3.5 年",
     "v1.0",
     "ok...yes",
+  ]) {
+    assert.equal(check(text), false, text);
+  }
+});
+
+test("doesn't take file or tech names for links", () => {
+  for (const text of [
+    "Next.js 好難",
+    "學會 Node.js 了",
+    "Vue.js",
+    "README.md",
+    "index.html",
+    "next.config.ts",
+    "app/page.tsx",
+    "package.json",
+    "main.py",
+    "截圖.png",
+    "photo-1.JPG",
   ]) {
     assert.equal(check(text), false, text);
   }
