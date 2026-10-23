@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { DanmakuLayer } from "@/components/danmaku/DanmakuLayer";
+import { DanmakuQr } from "@/components/danmaku/DanmakuQr";
 import { GuestbookPage } from "@/components/guestbook/GuestbookPage";
 import { cx } from "@/components/ui";
 import { BookContext, PageContext } from "./BookContext";
@@ -81,8 +82,9 @@ function toggleFullscreen() {
 /**
  * The projected flip book: a 16:9 page hinged at the top, flipped with the wheel, arrow keys,
  * PageUp/PageDown (presenter clickers), Home/End or a vertical swipe. Ported from docs/flipbook-demo.html.
+ * `isProjector` comes from the server (app/page.tsx); only then are danmaku and the QR code shown.
  */
-export function BookShell() {
+export function BookShell({ isProjector }: { isProjector: boolean }) {
   const [guestbookPages, setGuestbookPagesState] = useState<GuestbookPages>({});
   const leaves = useMemo(() => buildLeaves(guestbookPages), [guestbookPages]);
   // Track the current page by id, so pages inserted before it (more guestbook pages) don't move it.
@@ -251,7 +253,8 @@ export function BookShell() {
           return goTo(Number.MAX_SAFE_INTEGER);
         case "d":
         case "D":
-          return setDanmakuOn((on) => !on);
+          if (isProjector) setDanmakuOn((on) => !on);
+          return;
         case "f":
         case "F":
           return toggleFullscreen();
@@ -259,11 +262,11 @@ export function BookShell() {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [step, goTo]);
+  }, [step, goTo, isProjector]);
 
   const book = useMemo(
-    () => ({ danmakuOn, setDanmakuOn, goToChapter, setGuestbookPages }),
-    [danmakuOn, goToChapter, setGuestbookPages],
+    () => ({ isProjector, danmakuOn, setDanmakuOn, goToChapter, setGuestbookPages }),
+    [isProjector, danmakuOn, goToChapter, setGuestbookPages],
   );
 
   const chapters = useMemo(
@@ -285,7 +288,7 @@ export function BookShell() {
           page={cur + 1}
           total={n}
           onJump={goToChapter}
-          danmakuOn={danmakuOn}
+          danmakuOn={isProjector ? danmakuOn : undefined}
           onToggleDanmaku={() => setDanmakuOn(!danmakuOn)}
           onFullscreen={toggleFullscreen}
         />
@@ -334,7 +337,12 @@ export function BookShell() {
             ))}
           </div>
         </div>
-        <DanmakuLayer />
+        {isProjector && (
+          <>
+            <DanmakuLayer />
+            <DanmakuQr />
+          </>
+        )}
       </div>
     </BookContext>
   );

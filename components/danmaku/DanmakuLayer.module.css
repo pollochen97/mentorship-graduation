@@ -1,0 +1,28 @@
+/* Sized in vw, not cqw: the layer covers the whole screen, not just the book. */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Starts just past the right edge; DanmakuLayer moves it left with the Web Animations API.
+   Lanes run from near the top to about three quarters down, clear of the QR code in the corner. */
+.bullet {
+  position: absolute;
+  left: 100%;
+  top: calc(7% + var(--lane) * 9.5%);
+  white-space: nowrap;
+  font: 500 clamp(16px, 1.7vw, 40px) / 1.4 var(--f-body);
+  color: var(--ink);
+  background: var(--white);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 0.15em 0.6em;
+  will-change: transform;
+}
+
+.bullet b {
+  font-weight: 700;
+}
