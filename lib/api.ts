@@ -9,6 +9,7 @@ import {
   DanmakuResponse,
   ERROR_MESSAGES,
   ERROR_STATUS,
+  Me,
   NoteInput,
   NoteResponse,
   NotesResponse,
@@ -19,6 +20,7 @@ import {
   type Note,
   type NoteSection,
 } from "./schemas";
+import { supabaseAuth } from "./supabase/browser";
 
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: ApiError };
 
@@ -75,15 +77,30 @@ export async function fetchNotes(section: NoteSection): Promise<ApiResult<Note[]
   return r.ok ? { ok: true, data: r.data.notes } : r;
 }
 
+/** The guestbook's Google sign-in (#55, lib/auth.ts) as an Authorization header, or null when signed out. */
+async function bearer() {
+  const { data } = (await supabaseAuth()?.auth.getSession()) ?? { data: { session: null } };
+  return data.session ? { authorization: `Bearer ${data.session.access_token}` } : null;
+}
+
+/** Needs a Google sign-in on the whitelist (#55): unauthorized when signed out, else not_allowed. */
 export async function sendNote(input: NoteInput): Promise<ApiResult<Note>> {
   const valid = validate(NoteInput, input);
   if (!valid.ok) return valid;
   if (USE_MOCK) return mockApi.sendNote(valid.data);
+  const headers = await bearer();
+  if (!headers) return failure("unauthorized", "請先登入");
   const r = await request("/api/notes", NoteResponse, {
     method: "POST",
+    headers,
     body: JSON.stringify(valid.data),
   });
   return r.ok ? { ok: true, data: r.data.note } : r;
+}
+
+/** Whether the Google account behind `token` may write notes (#55). Not used in mock mode. */
+export async function fetchMe(token: string): Promise<ApiResult<Me>> {
+  return request("/api/me", Me, { headers: { authorization: `Bearer ${token}` } });
 }
 
 export async function sendDanmaku(input: DanmakuInput): Promise<ApiResult<Danmaku>> {

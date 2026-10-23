@@ -103,6 +103,7 @@ export function Dashboard() {
   }
 
   const paused = settings?.danmakuEnabled === false;
+  const notesOpen = settings?.notesEnabled === true;
 
   return (
     <div className={styles.dashboard}>
@@ -154,6 +155,35 @@ export function Dashboard() {
           }
         >
           {paused ? "恢復彈幕" : "暫停全部彈幕"}
+        </button>
+      </section>
+
+      <section className={cx(styles.card, notesOpen ? styles.liveCard : styles.pausedCard)}>
+        <h2 className={styles.heading}>留言開關</h2>
+        <p className={styles.state}>
+          {settings === null ? "讀取中…" : notesOpen ? "▶ 開放留言中" : "⏸ 留言已關閉"}
+        </p>
+        <p className={styles.hint}>
+          開放時，白名單裡的 ENG 夥伴用 Google 登入後可以留言；關閉後留言板只能看。白名單在 Supabase
+          的 allowed_emails 資料表維護。
+        </p>
+        <button
+          type="button"
+          className={cx(styles.big, notesOpen ? styles.danger : styles.primary)}
+          disabled={settings === null || busy === "notes"}
+          onClick={() =>
+            act(
+              "notes",
+              () =>
+                adminFetch("/settings", Settings, {
+                  method: "PUT",
+                  body: { notesEnabled: !notesOpen },
+                }),
+              notesOpen ? "已關閉留言" : "已開放留言",
+            )
+          }
+        >
+          {notesOpen ? "關閉留言" : "開放留言"}
         </button>
       </section>
 
@@ -235,6 +265,7 @@ export function Dashboard() {
                 <div className={styles.text}>
                   <span className={styles.meta}>
                     {SECTION_LABEL[n.section]} · {dateTime.format(new Date(n.createdAt))}
+                    {n.email && ` · ${n.email}`}
                     {n.hidden && " · 已隱藏"}
                   </span>
                   <span>

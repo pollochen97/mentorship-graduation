@@ -5,7 +5,21 @@ export type Database = {
   
   "public": {
           Tables: {
-            "danmaku": {
+            "allowed_emails": {
+                  Row: {
+                    "created_at": string,"email": string,"note": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"email": string,"note"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"email"?: string,"note"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"danmaku": {
                   Row: {
                     "body": string,"client_id": string,"created_at": string,"hidden_at": string | null,"id": number,"ip_hash": string,"name": string
                   }
@@ -57,7 +71,7 @@ export type Database = {
 { Args: { "p_body": string,"p_client_id": string,"p_ip_hash": string,"p_ip_per_minute"?: number,"p_name": string }; Returns: Json
                            },
 "post_note":
-{ Args: { "p_body": string,"p_client_id": string,"p_color": number,"p_name": string,"p_section": string }; Returns: Json
+{ Args: { "p_body": string,"p_client_id": string,"p_color": number,"p_name": string,"p_section": string,"p_user_id"?: string }; Returns: Json
                            },
 "rate_limit_wait":
 { Args: { "max_count": number,"now_at": string,"period": string,"recent": (string)[] }; Returns: number

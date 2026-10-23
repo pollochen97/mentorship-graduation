@@ -10,18 +10,21 @@ import { Danmaku, Note, NoteSection, Settings } from "@/lib/schemas";
 // GET  /api/admin/notes?section=m1         → AdminNoteList: newest first, hidden ones included
 // PATCH /api/admin/notes/[id]   (HideInput) → { note }; sends note:hide
 // GET  /api/admin/settings                 → Settings
-// PUT  /api/admin/settings (SettingsInput) → Settings; sends settings:update
+// PUT  /api/admin/settings (SettingsInput) → Settings; sends settings:update. Either switch, or both
 
 export const LoginInput = z.object({ password: z.string().min(1, "請輸入密碼") });
 
 export const HideInput = z.object({ hidden: z.boolean() });
 
-export const SettingsInput = Settings.pick({ danmakuEnabled: true });
+export const SettingsInput = Settings.pick({ danmakuEnabled: true, notesEnabled: true })
+  .partial()
+  .refine((s) => Object.keys(s).length > 0, "沒有要修改的設定");
 
 export const AdminDanmaku = Danmaku.extend({ hidden: z.boolean() });
 export type AdminDanmaku = z.infer<typeof AdminDanmaku>;
 
-export const AdminNote = Note.extend({ hidden: z.boolean() });
+/** `email`: the Google account that wrote the note (#55); null for notes from before sign-in. */
+export const AdminNote = Note.extend({ hidden: z.boolean(), email: z.string().nullable() });
 export type AdminNote = z.infer<typeof AdminNote>;
 
 export const AdminDanmakuList = z.object({ danmaku: z.array(AdminDanmaku) });

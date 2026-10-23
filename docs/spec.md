@@ -11,11 +11,11 @@
 | 網站名稱 | ENG曼陀號結業分享 |
 | 發表日期 | 11/07 Sat. |
 | 主畫面 | 現場投影（16:9），由工作人員用滾輪、方向鍵或簡報筆操作 |
-| 來賓互動 | 手機掃 QR code 進入彈幕頁，輸入姓名和內容後送出；留言板可在書頁上填寫 |
+| 來賓互動 | 手機掃 QR code 進入彈幕頁，輸入姓名和內容後送出；留言板限 ENG 夥伴用 Google 登入後在書頁上填寫（見 3.1） |
 | 預估同時在線 | 約 300 人發彈幕；訂閱即時訊息的只有投影端 1–2 台 |
 | 活動後 | 網站繼續公開，但加上 `noindex`，不讓搜尋引擎收錄；留言板繼續開放，之後封存成唯讀（見 3.6） |
 
-**不在本次範圍內：** Google 登入（資料表先預留欄位，之後再接）、手機版的完整翻書體驗（手機能看就好，不另外優化）。
+**不在本次範圍內：** 手機版的完整翻書體驗（手機能看就好，不另外優化）。
 
 ## 2. 頁面結構與內容需求
 
@@ -54,9 +54,12 @@
 - 送出後，便條紙要從輸入框飛到空位並「黏上」：位移、輕微旋轉、落地時彈一下；便條顏色從 4 色中隨機挑一個
 - 每頁放 9 張便條，右下角保留給輸入框；留言超過一頁時自動加頁
 - 別人新增的留言要即時出現（走 Realtime Broadcast）；只有投影電腦即時更新，一般訪客重新整理後才看到（見 3.5）
-- 活動結束後繼續開放留言，不需要審核，直到封存（見 3.6）
-- 可以隱藏式下架：管理員在後台按下隱藏後，那則留言不再顯示，但資料仍留在 DB（`hidden_at` 欄位）
-- 之後要接 Google 登入：資料表先預留可以為空的 `user_id` 欄位，接了登入也不用改 schema
+- **只有 ENG 夥伴能留言**（#55）：用 Google 登入，email 要在 `allowed_emails` 白名單裡。白名單在 Supabase Dashboard 維護，不放進 repo。任何人都能看留言
+  - 未登入時便條紙位置顯示「用 Google 登入」；不在名單內時顯示目前帳號的 email、「換帳號」和「重新確認」
+  - 姓名欄預設帶入 Google 名稱，可以修改；每則留言記下作者的 `user_id`，後台看得到作者 email，公開 API 不回傳
+  - LINE 等 App 的內建瀏覽器不能用 Google 登入，要提示改用瀏覽器開啟
+- **開放期間由後台的「留言開關」控制**（`settings.notes_enabled`，預設關閉）：10/24–10/28 開放夥伴留言，之後關閉，活動當天只展示便條。關閉時便條紙位置顯示「留言已截止」
+- 不需要審核；可以隱藏式下架：管理員在後台按下隱藏後，那則留言不再顯示，但資料仍留在 DB（`hidden_at` 欄位）
 
 ### 3.2 彈幕
 
@@ -86,6 +89,7 @@
 - 用環境變數 `ADMIN_PASSWORD` 登入，登入後發一個簽章 cookie
 - 功能：
   - 彈幕總開關（一鍵暫停或恢復所有彈幕）
+  - 留言開關（開放或關閉留言板，見 3.1）
   - 最新 50 則彈幕列表，可單則下架（投影端即時移除）
   - 留言列表，可隱藏／取消隱藏
   - 上傳大合照
@@ -102,8 +106,7 @@
 ### 3.6 第二階段（活動後再做）
 
 - **封存**：匯出留言（含暱稱）到 `content/archive.json`，用 `NEXT_PUBLIC_DATA_SOURCE=archive` 切成唯讀靜態網站，之後可停用 Supabase。彈幕不留存
-- **暱稱**：留言改用 Supabase 匿名登入加暱稱，取代自填姓名。暱稱設定後不能改、不能重複，管理員可修改不當暱稱。舊留言保留原本的姓名
-- **Google**：之後用 `linkIdentity` 綁定 Google，`user_id` 不變，留言和暱稱都保留
+- ~~暱稱、Google 綁定~~：改成活動前就做的 Google 登入加白名單（3.1、#55），不再另外做匿名登入和暱稱
 
 ## 4. UI 設計風格
 
@@ -174,9 +177,10 @@ Vercel 是 serverless，無法維持長連線，所以即時推播交給 Supabas
 
 | 資料表 | 欄位 | 說明 |
 | --- | --- | --- |
-| `notes` | `id` uuid, `section` text, `name` text, `body` text, `color` smallint, `client_id` text, `user_id` uuid null, `created_at`, `hidden_at` null | `section` 限定 `m1`–`m4`；用 check constraint 限制 `name` ≤ 20 字、`body` ≤ 50 字 |
+| `notes` | `id` uuid, `section` text, `name` text, `body` text, `color` smallint, `client_id` text, `user_id` uuid null, `created_at`, `hidden_at` null | `section` 限定 `m1`–`m4`；用 check constraint 限制 `name` ≤ 20 字、`body` ≤ 50 字；`user_id` 是作者的 Google 登入（`auth.users`），#55 之前的留言是 null |
+| `allowed_emails` | `email` text pk, `note` text null, `created_at` | 可以留言的 ENG 夥伴（#55），email 一律小寫；在 Dashboard 維護 |
 | `danmaku` | `id` bigint, `name` text, `body` text, `client_id` text, `created_at`, `hidden_at` null | `name` ≤ 10、`body` ≤ 20；建立 `(client_id, created_at)` 索引，給限流查詢用 |
-| `settings` | `key` text pk, `value` jsonb | 放 `danmaku_enabled`、`final_photo_url` |
+| `settings` | `key` text pk, `value` jsonb | 放 `danmaku_enabled`、`final_photo_url`、`notes_enabled` |
 
 ### 5.3 API
 
@@ -185,13 +189,14 @@ Vercel 是 serverless，無法維持長連線，所以即時推播交給 Supabas
 | Method | 路徑 | 用途 | 成功後 Broadcast |
 | --- | --- | --- | --- |
 | GET | `/api/notes?section=m1` | 取得未隱藏的留言 | — |
-| POST | `/api/notes` | 新增留言 | `note:new` |
+| POST | `/api/notes` | 新增留言；要帶 `Authorization: Bearer <Google 登入的 access token>`，email 要在白名單（#55） | `note:new` |
+| GET | `/api/me` | 目前的 Google 登入是否在白名單（#55） | — |
 | POST | `/api/danmaku` | 送出彈幕（含限流和髒話過濾） | `danmaku:new` |
-| GET | `/api/settings` | 取得彈幕開關和大合照網址 | — |
+| GET | `/api/settings` | 取得彈幕開關、留言開關和大合照網址 | — |
 | POST | `/api/admin/login` | 管理員登入 | — |
 | PATCH | `/api/admin/danmaku/[id]` | 下架彈幕 | `danmaku:remove` |
 | PATCH | `/api/admin/notes/[id]` | 隱藏／取消隱藏留言 | `note:hide` |
-| PUT | `/api/admin/settings` | 彈幕總開關 | `settings:update` |
+| PUT | `/api/admin/settings` | 彈幕總開關、留言開關 | `settings:update` |
 | POST | `/api/admin/final-photo` | 取得上傳用的 signed URL，上傳完成後寫入 `settings` | `photo:final` |
 
 ### 5.4 專案結構

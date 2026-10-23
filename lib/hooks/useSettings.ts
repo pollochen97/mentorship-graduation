@@ -5,7 +5,7 @@ import { fetchSettings } from "../api";
 import { onLive } from "../realtime";
 import type { Settings } from "../schemas";
 
-const DEFAULTS: Settings = { danmakuEnabled: true, finalPhotoUrl: null };
+const DEFAULTS: Settings = { danmakuEnabled: true, notesEnabled: false, finalPhotoUrl: null };
 
 /**
  * Site settings. With `live` (the projector only, spec 3.5) they are kept up to date by

@@ -7,7 +7,7 @@ import { broadcast } from "@/lib/supabase/broadcast";
 import { toNote } from "@/lib/supabase/rows";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "../../auth";
-import { ADMIN_NOTE_COLUMNS, toAdminNote } from "../../rows";
+import { ADMIN_NOTE_COLUMNS, toAdminNotes } from "../../rows";
 import { HideInput } from "../../schemas";
 
 export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/admin/notes/[id]">) {
@@ -33,5 +33,6 @@ export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/admin/
   if (!data) return errorResponse("not_found");
 
   await broadcast("note:hide", { note: toNote(data), hidden });
-  return Response.json({ note: toAdminNote(data) });
+  const [note] = await toAdminNotes([data]);
+  return Response.json({ note });
 }

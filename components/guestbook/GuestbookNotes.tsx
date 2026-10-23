@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useBook } from "@/components/book/BookContext";
 import type { GuestbookSection } from "@/components/book/types";
-import { useNotes } from "@/lib/hooks";
+import { useNotes, useSettings } from "@/lib/hooks";
 import { pagesFor } from "./paging";
 
 function useSection(section: GuestbookSection, live: boolean) {
@@ -42,7 +42,13 @@ function useSection(section: GuestbookSection, live: boolean) {
 
 type SectionNotes = ReturnType<typeof useSection>;
 
-const NotesContext = createContext<Record<GuestbookSection, SectionNotes> | null>(null);
+type Guestbooks = {
+  sections: Record<GuestbookSection, SectionNotes>;
+  /** Whether the admin has the guestbooks open for new notes (#55); null until the settings load. */
+  enabled: boolean | null;
+};
+
+const NotesContext = createContext<Guestbooks | null>(null);
 
 /**
  * Loads each guestbook once for all of its pages, which BookShell keeps mounted side by side, and
@@ -54,7 +60,12 @@ export function GuestbookNotes({ children }: { children: ReactNode }) {
   const m2 = useSection("m2", isProjector);
   const m3 = useSection("m3", isProjector);
   const m4 = useSection("m4", isProjector);
-  const value = useMemo(() => ({ m1, m2, m3, m4 }), [m1, m2, m3, m4]);
+  const { notesEnabled, loading } = useSettings({ live: isProjector });
+  const enabled = loading ? null : notesEnabled;
+  const value = useMemo(
+    () => ({ sections: { m1, m2, m3, m4 }, enabled }),
+    [m1, m2, m3, m4, enabled],
+  );
   return <NotesContext value={value}>{children}</NotesContext>;
 }
 
@@ -62,9 +73,10 @@ export function GuestbookNotes({ children }: { children: ReactNode }) {
  * One guestbook's notes, oldest first, and `post` to add one.
  * `shouldFly(id)` is true once for a note that arrived after the first load (posted here, or live on
  * the projector), so it flies in from the pad instead of just appearing.
+ * `enabled`: whether new notes are taken at all (#55).
  */
 export function useGuestbook(section: GuestbookSection) {
   const value = useContext(NotesContext);
   if (!value) throw new Error("useGuestbook() must be used inside <GuestbookNotes>");
-  return value[section];
+  return { ...value.sections[section], enabled: value.enabled };
 }

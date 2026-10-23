@@ -37,8 +37,10 @@ export function toSettings(rows: { key: string; value: unknown }[]): Settings {
   const value = (key: string) => rows.find((r) => r.key === key)?.value;
   const enabled = value("danmaku_enabled");
   const photo = value("final_photo_url");
+  const notes = value("notes_enabled");
   return {
     danmakuEnabled: typeof enabled === "boolean" ? enabled : true,
+    notesEnabled: notes === true,
     finalPhotoUrl: typeof photo === "string" ? photo : null,
   };
 }

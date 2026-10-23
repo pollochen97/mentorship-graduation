@@ -116,6 +116,9 @@ select throws_ok(
 
 -- ---- post_note ----
 
+-- The guestbook starts closed (20261023000001); google_login.test.sql covers the switch.
+update public.settings set value = 'true' where key = 'notes_enabled';
+
 select ok(
   public.post_note('n1', 'm1', '小美', '謝謝大家！', 2::smallint) ? 'note', 'first note goes in'
 );
