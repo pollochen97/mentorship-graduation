@@ -9,7 +9,7 @@ import { PROJECTS } from "@/content/projects";
 import type { Project } from "@/content/types";
 import styles from "./final/Final.module.css";
 
-/** The six final projects. Clicking a card shows its QR code full size, for scanning from the back. */
+/** The final projects. Clicking a card shows its QR code full size, for scanning from the back. */
 export function Final({ no, label }: PageProps) {
   const [open, setOpen] = useState(false);
   // Kept after closing so the dialog doesn't flash empty before it closes.
@@ -22,7 +22,7 @@ export function Final({ no, label }: PageProps) {
           FINAL PROJECTS
         </Tag>
         <h2 className={styles.title}>{label}</h2>
-        <p className={styles.hint}>{PROJECTS.length} 組專案，用手機掃 QR code 看作品</p>
+        <p className={styles.hint}>用手機掃 QR code 看各組作品</p>
       </header>
       <div className={styles.grid}>
         {PROJECTS.map((p) => (
@@ -42,7 +42,7 @@ export function Final({ no, label }: PageProps) {
             </span>
             <span className={styles.photo}>
               {p.image ? (
-                <Image src={p.image} alt="" fill sizes="14vw" className={styles.img} />
+                <Image src={p.image} alt="" fill sizes="20vw" className={styles.img} />
               ) : (
                 <span className={styles.empty} aria-hidden>
                   PHOTO
