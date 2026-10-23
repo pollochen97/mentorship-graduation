@@ -1,6 +1,6 @@
 // Shapes of the static content in content/*.ts (#4). The data files belong to #6 and #7.
 // Optional fields can be left out; the page then hides the matching element.
-import type { Accent, Photo, PhotoLayout } from "@/components/ui";
+import type { Accent, Photo } from "@/components/ui";
 
 export type StaffMember = {
   /** e.g. 船長、引水人、助教、客座講師 */
@@ -39,9 +39,11 @@ export type Section = {
   /** Bullet points under the text, e.g. a monthly meeting's agenda. */
   outline?: string[];
   accent: Accent;
-  /** hero = 1 photo, grid2 = 2, grid3 = 6, mosaic = 3. Missing photos show a placeholder. */
-  layout: PhotoLayout;
-  /** Paths under public/, e.g. { src: "/photos/m1/01.jpg", alt: "分組討論" }. */
+  /**
+   * Imported images, e.g. `{ src: m1_01, alt: "分組討論" }` after `import m1_01 from
+   * "@/public/photos/m1/01.jpg"`. Laid out in rows by their shape, uncropped; an empty list shows
+   * two placeholders.
+   */
   photos: Photo[];
   /** Big numbers in boxes, e.g. applicant count (audition). */
   stats?: { value: string; label: string }[];

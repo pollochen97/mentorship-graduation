@@ -1,0 +1,39 @@
+/* The frame is drawn outside each photo with box-shadow, so the layout only has to place the photos:
+   the padding keeps the outermost frames (and the hard shadow) inside the box, and the gap leaves
+   room for two frames between neighbours. */
+.rows {
+  --mat: 0.5cqw;
+  --frame: calc(var(--mat) + var(--line-w));
+  --drop: max(3px, 0.2cqw);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: calc(var(--space-sm) + 2 * var(--frame));
+  padding: var(--frame) calc(var(--frame) + var(--drop)) calc(var(--frame) + var(--drop))
+    var(--frame);
+}
+
+.row {
+  display: flex;
+  gap: inherit;
+}
+
+/* White mat, ink border, then the hard shadow, like the frames in PhotoGrid. */
+.photo {
+  position: relative;
+  flex: none;
+  margin: 0;
+  background: #e9e4d6;
+  box-shadow:
+    0 0 0 var(--mat) var(--white),
+    0 0 0 var(--frame) var(--ink),
+    var(--drop) var(--drop) 0 var(--frame) var(--ink);
+}
+
+.img {
+  object-fit: cover;
+}
