@@ -1,0 +1,177 @@
+/* The demo's yellow cover: title column on the left, the main visual in a framed box on the right. */
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--page-pad);
+  background: var(--yellow);
+}
+
+.side {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.kicker {
+  padding: 0.5cqw 1.2cqw;
+  font: var(--type-label);
+  letter-spacing: 0.14em;
+  color: var(--yellow);
+  background: var(--ink);
+}
+
+/* The largest type in the book: it has to read from the back row (check at the rehearsal, #22). */
+.title {
+  margin: var(--space-sm) 0 0;
+  font: var(--type-display);
+  white-space: nowrap;
+}
+
+.subtitle {
+  margin: 0;
+  font: var(--type-heading);
+}
+
+.date {
+  margin-top: var(--space-sm);
+  background: var(--white);
+}
+
+/* The date as the spec writes it, "11/07 Sat.": Stamp would set it in capitals. */
+.date > :last-child {
+  font: var(--type-stat);
+  text-transform: none;
+}
+
+.voyageLog {
+  margin-top: auto;
+  padding: 0.9cqw 1.6cqw;
+  font: var(--type-meta);
+  background: var(--white);
+  border: var(--line);
+  box-shadow: var(--shadow-md);
+}
+
+.visual {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  border: var(--line);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ---- The main visual (Voyage.tsx), in viewBox units: 1 = 1% of the square it's drawn on. ---- */
+
+.voyage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  stroke: var(--ink);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sky {
+  fill: var(--pink);
+  stroke: none;
+}
+
+.sun {
+  fill: var(--yellow);
+}
+
+.cloud {
+  fill: var(--white);
+}
+
+.line {
+  fill: none;
+}
+
+.far {
+  fill: var(--band-1);
+}
+
+.near {
+  fill: var(--blue);
+}
+
+.foam {
+  fill: none;
+  stroke: var(--white);
+}
+
+.flag {
+  fill: var(--mint);
+}
+
+.sail {
+  fill: var(--white);
+}
+
+.jib {
+  fill: var(--yellow);
+}
+
+.hull {
+  fill: var(--white);
+}
+
+.name {
+  font: 700 4px var(--f-mono);
+  letter-spacing: 0.4px;
+  text-anchor: middle;
+  fill: var(--ink);
+  stroke: none;
+}
+
+/* The ship rocks on the swell and the two bands of sea drift opposite ways, one wavelength a loop. */
+.ship {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: rock 5s ease-in-out infinite;
+}
+
+.drift {
+  animation: drift 9s linear infinite;
+}
+
+.driftBack {
+  animation: drift-back 6s linear infinite;
+}
+
+@keyframes rock {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(1px) rotate(1.5deg);
+  }
+}
+
+@keyframes drift {
+  to {
+    transform: translateX(20px);
+  }
+}
+
+@keyframes drift-back {
+  to {
+    transform: translateX(-16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ship,
+  .drift,
+  .driftBack {
+    animation: none;
+  }
+}
