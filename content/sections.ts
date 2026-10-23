@@ -1,7 +1,7 @@
 // Content for the chapters built on SectionPage (#11): audition, welcome, monthly meetings 1–4, meetups.
 // The shape is in content/types.ts; the values belong to #7.
-// TODO(#7): the audition text and steps, and the meetups date and text, are still sample copy; the
-// audition has no photos yet and meetups is one short. Photo alt texts are placeholders too.
+// TODO(#7): the audition steps and the meetups date are still sample copy, and meetups is one photo
+// short. Photo alt texts are placeholders too.
 import type { Photo } from "@/components/ui";
 import type { Section, SectionKey } from "./types";
 
@@ -18,10 +18,10 @@ export const SECTIONS: Record<SectionKey, Section> = {
     tag: "AUDITION",
     title: "海選",
     date: "2026.05.09",
-    text: "一百多位報名者、兩天面試。每個人都帶著自己的故事來，最後只能選出 24 位水手。",
+    text: "緊張的分組討論，才發現大家都好厲害。第一天結束，手機裡已經多了好多 IG 和 LinkedIn。",
     accent: "yellow",
     layout: "grid2",
-    photos: [],
+    photos: photos("audition", 2, "海選"),
     steps: ["線上報名", "書面審查", "面試", "錄取通知"],
   },
   welcome: {
@@ -78,7 +78,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
     tag: "MEETUPS",
     title: "各種小聚",
     date: "2026.07 — 10",
-    text: "co-working、月會後的聚餐。月會之外，這些才是大家真正變熟的時候。",
+    text: "月會後的聚餐、一起 co-working、一起去聽 COSCUP。月會之外，這些才是大家真正變熟的時候。",
     accent: "pink",
     layout: "grid3",
     photos: photos("meetups", 5, "各種小聚"),
