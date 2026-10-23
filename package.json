@@ -9,6 +9,7 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "typecheck": "next typegen && tsc --noEmit",
+    "test": "node --test \"lib/**/*.test.ts\"",
     "db:types": "supabase gen types typescript --local --schema public > lib/supabase/database.types.ts"
   },
   "dependencies": {
