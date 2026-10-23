@@ -12,7 +12,8 @@
 .bullet {
   position: absolute;
   left: 100%;
-  top: calc(7% + var(--lane) * 9.5%);
+  /* 3.6vw keeps lanes a bullet's height apart in windows wider than 16:9. */
+  top: calc(7% + var(--lane) * max(9.5%, 3.6vw));
   white-space: nowrap;
   font: 500 clamp(16px, 1.7vw, 40px) / 1.4 var(--f-body);
   color: var(--ink);
