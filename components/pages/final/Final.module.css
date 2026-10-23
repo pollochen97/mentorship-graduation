@@ -33,9 +33,14 @@
   gap: var(--space-md);
 }
 
+/* QR code on the left and name at the top: on the projector, the floating danmaku QR code (#18)
+   covers the bottom-right corner of the last card. */
 .card {
   display: grid;
-  grid-template: minmax(0, 1fr) auto / minmax(0, 1fr) auto;
+  grid-template:
+    "qr caption" auto
+    "qr photo" minmax(0, 1fr)
+    / auto minmax(0, 1fr);
   gap: var(--space-sm);
   min-height: 0;
   padding: var(--space-sm);
@@ -55,6 +60,7 @@
 }
 
 .photo {
+  grid-area: photo;
   position: relative;
   overflow: hidden;
   background: #e9e4d6;
@@ -81,6 +87,7 @@
 }
 
 .caption {
+  grid-area: caption;
   display: grid;
   gap: 0.3cqw;
   min-width: 0;
@@ -97,8 +104,7 @@
 }
 
 .qr {
-  grid-row: 1 / -1;
-  grid-column: 2;
+  grid-area: qr;
   align-self: center;
   display: block;
   width: 13cqw;

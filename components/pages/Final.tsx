@@ -36,6 +36,10 @@ export function Final({ no, label }: PageProps) {
               setOpen(true);
             }}
           >
+            <span className={styles.caption}>
+              {p.team && <span className={styles.team}>{p.team}</span>}
+              <span className={styles.name}>{p.name}</span>
+            </span>
             <span className={styles.photo}>
               {p.image ? (
                 <Image src={p.image} alt="" fill sizes="14vw" className={styles.img} />
@@ -44,10 +48,6 @@ export function Final({ no, label }: PageProps) {
                   PHOTO
                 </span>
               )}
-            </span>
-            <span className={styles.caption}>
-              {p.team && <span className={styles.team}>{p.team}</span>}
-              <span className={styles.name}>{p.name}</span>
             </span>
             <QRCodeSVG value={p.url} level="M" marginSize={2} className={styles.qr} />
           </button>
