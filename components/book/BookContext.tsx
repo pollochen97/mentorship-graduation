@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 import type { GuestbookSection } from "./types";
 
 type BookContextValue = {
@@ -28,9 +28,20 @@ export function useBook() {
   return value;
 }
 
-export const PageContext = createContext({ active: false });
+export const PageContext = createContext({ active: false, near: false });
 
 /** True while this page is the one showing, e.g. to start an animation only when it can be seen. */
 export function usePageActive() {
   return useContext(PageContext).active;
+}
+
+/**
+ * True once this page is showing or next to it, and from then on. Every page is mounted at once, so
+ * pages hold back their photos until then; otherwise opening the book would download them all.
+ */
+export function usePageNear() {
+  const { near } = useContext(PageContext);
+  const [seen, setSeen] = useState(near);
+  if (near && !seen) setSeen(true);
+  return near || seen;
 }

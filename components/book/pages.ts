@@ -17,6 +17,7 @@ export const CHAPTERS: Chapter[] = [
   { key: "m1", label: "第一次月會", component: SectionPage, guestbook: "m1" },
   { key: "m2", label: "第二次月會", component: SectionPage, guestbook: "m2" },
   { key: "m3", label: "第三次月會", component: SectionPage, guestbook: "m3" },
+  { key: "m4", label: "第四次月會", component: SectionPage },
   { key: "final", label: "第四次月會 Final", component: Final, guestbook: "m4" },
   { key: "meetups", label: "各種小聚", component: SectionPage },
   { key: "group-photo", label: "大合照", component: GroupPhoto },

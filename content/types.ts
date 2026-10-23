@@ -25,7 +25,7 @@ export type Sailor = {
   linkedin?: string;
 };
 
-export type SectionKey = "audition" | "welcome" | "m1" | "m2" | "m3" | "meetups";
+export type SectionKey = "audition" | "welcome" | "m1" | "m2" | "m3" | "m4" | "meetups";
 
 /** A chapter built on SectionPage (#11). */
 export type Section = {
@@ -34,10 +34,10 @@ export type Section = {
   title: string;
   /** Shown as a stamp, e.g. "2026.07.26" or "2026.06.14 — 06.15". */
   date: string;
-  /** Small text on the stamp; defaults to "Port of call". */
-  place?: string;
   /** One short paragraph, about 50–80 characters. */
-  text: string;
+  text?: string;
+  /** Bullet points under the text, e.g. a monthly meeting's agenda. */
+  outline?: string[];
   accent: Accent;
   /** hero = 1 photo, grid2 = 2, grid3 = 6, mosaic = 3. Missing photos show a placeholder. */
   layout: PhotoLayout;

@@ -331,7 +331,7 @@ export function BookShell({ isProjector }: { isProjector: boolean }) {
                   style={style}
                   inert={k !== cur}
                 >
-                  <LeafContent leaf={leaf} active={k === cur} />
+                  <LeafContent leaf={leaf} active={k === cur} near={Math.abs(k - cur) <= 1} />
                 </div>
               );
             })}
@@ -353,13 +353,21 @@ export function BookShell({ isProjector }: { isProjector: boolean }) {
   );
 }
 
-// Memoised so flipping only re-renders the two pages whose `active` changed.
-const LeafContent = memo(function LeafContent({ leaf, active }: { leaf: Leaf; active: boolean }) {
+// Memoised so flipping only re-renders the few pages whose `active` or `near` changed.
+const LeafContent = memo(function LeafContent({
+  leaf,
+  active,
+  near,
+}: {
+  leaf: Leaf;
+  active: boolean;
+  near: boolean;
+}) {
   const { chapter, guestbook, no, pageIndex, pageCount } = leaf;
   const Page = chapter.component;
   return (
     <section className={styles.face} aria-label={chapter.label}>
-      <PageContext value={{ active }}>
+      <PageContext value={{ active, near }}>
         {guestbook ? (
           <GuestbookPage
             section={guestbook}
