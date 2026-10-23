@@ -15,6 +15,7 @@ import type { ApiResult } from "@/lib/api";
 import { Settings, type ApiError, type NoteSection } from "@/lib/schemas";
 import { adminFetch } from "./adminApi";
 import styles from "./admin.module.css";
+import { PhotoUpload } from "./PhotoUpload";
 
 const SECTIONS: { key: NoteSection | "all"; label: string }[] = [
   { key: "all", label: "全部" },
@@ -156,7 +157,10 @@ export function Dashboard() {
         </button>
       </section>
 
-      {/* #20: <PhotoUpload /> goes here. */}
+      <PhotoUpload
+        current={settings?.finalPhotoUrl ?? null}
+        onUploaded={() => setTick((t) => t + 1)}
+      />
 
       <section className={styles.card}>
         <h2 className={styles.heading}>最新 50 則彈幕</h2>
