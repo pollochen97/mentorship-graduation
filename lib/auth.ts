@@ -7,23 +7,31 @@
 import type { Session } from "@supabase/supabase-js";
 import { useSyncExternalStore } from "react";
 import { fetchMe } from "./api";
-import { mockAuth, USE_MOCK } from "./mock";
+import { mockAuth, USE_MOCK, type MockAuth } from "./mock";
 import { supabaseAuth } from "./supabase/browser";
+
+/**
+ * Whether a signed-in address is on the whitelist: being asked, yes, no, or the question failed (so
+ * still unknown). Only "allowed" gets the form; the server checks again on every note anyway.
+ */
+export type Access = "checking" | "allowed" | "denied" | "error";
 
 export type Member =
   | { status: "loading" }
   | { status: "signedOut" }
-  /** `allowed`: whether the address is on the whitelist; null while asking, or if asking failed. */
-  | { status: "signedIn"; email: string; name: string; allowed: boolean | null };
+  | { status: "signedIn"; email: string; name: string; access: Access };
 
 /** Where /auth/callback sends the reader back to: the book page they signed in from. */
 export const RETURN_KEY = "guestbook-auth-return";
 
+const sailor = { status: "signedIn", email: "sailor@gmail.com", name: "測試學員" } as const;
 const MOCK_MEMBERS = {
   none: { status: "signedOut" },
-  denied: { status: "signedIn", email: "someone@gmail.com", name: "路人", allowed: false },
-  allowed: { status: "signedIn", email: "sailor@gmail.com", name: "測試學員", allowed: true },
-} as const satisfies Record<string, Member>;
+  checking: { ...sailor, access: "checking" },
+  error: { ...sailor, access: "error" },
+  denied: { status: "signedIn", email: "someone@gmail.com", name: "路人", access: "denied" },
+  allowed: { ...sailor, access: "allowed" },
+} as const satisfies Record<MockAuth, Member>;
 
 let member: Member = { status: "loading" };
 let userId: string | null = null;
@@ -39,11 +47,12 @@ function set(next: Member) {
 async function check(session: Session) {
   const r = await fetchMe(session.access_token);
   if (userId !== session.user.id) return; // signed out or switched in the meantime
-  if (r.ok) {
-    if (member.status === "signedIn") set({ ...member, allowed: r.data.allowed });
-  } else if (r.error.code === "unauthorized") {
+  if (!r.ok && r.error.code === "unauthorized") {
     await supabaseAuth()?.auth.signOut({ scope: "local" });
+    return;
   }
+  if (member.status !== "signedIn") return;
+  set({ ...member, access: !r.ok ? "error" : r.data.allowed ? "allowed" : "denied" });
 }
 
 function apply(session: Session | null) {
@@ -61,7 +70,7 @@ function apply(session: Session | null) {
     status: "signedIn",
     email,
     name: meta.full_name || meta.name || email.split("@")[0],
-    allowed: null,
+    access: "checking",
   });
   // Not awaited inside onAuthStateChange: calling Supabase from its callback can deadlock.
   setTimeout(() => void check(session));
@@ -117,12 +126,15 @@ async function signOut() {
   await supabaseAuth()?.auth.signOut({ scope: "local" });
 }
 
-/** Asks again whether the account may write, e.g. after the server said it may not. */
+/** Asks again whether the account may write: after asking failed, or the server said it may not. */
 async function recheck() {
-  if (USE_MOCK) return;
+  if (USE_MOCK) {
+    if (mockAuth.get() === "error") mockAuth.set("allowed");
+    return;
+  }
   const { data } = (await supabaseAuth()?.auth.getSession()) ?? { data: { session: null } };
   if (!data.session) return apply(null);
-  if (member.status === "signedIn") set({ ...member, allowed: null });
+  if (member.status === "signedIn") set({ ...member, access: "checking" });
   await check(data.session);
 }
 

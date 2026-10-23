@@ -45,7 +45,7 @@ npx supabase stop
 
 留言要用 Google 登入，而且 email 要在 `allowed_emails` 資料表裡；後台的「留言開關」打開時才能留言。
 
-- **mock 模式**：預設是「已登入、在名單內」、留言開放中。在 Console 用 `__mock.auth("none")`（未登入）、`__mock.auth("denied")`（不在名單內）、`__mock.auth()`（恢復）切換登入狀態，`__mock.notes(false)` / `__mock.notes()` 關閉或開放留言。
+- **mock 模式**：預設是「已登入、在名單內」、留言開放中。在 Console 用 `__mock.auth("none")`（未登入）、`__mock.auth("checking")`（確認名單中）、`__mock.auth("error")`（確認失敗）、`__mock.auth("denied")`（不在名單內）、`__mock.auth()`（恢復）切換登入狀態，`__mock.notes(false)` / `__mock.notes()` 關閉或開放留言。
 - **本機 Supabase**：需要自己的 Google OAuth client，重新導向 URI 加上 `http://127.0.0.1:54321/auth/v1/callback`。
   1. 在 `supabase/.env` 填入下面兩個變數（這個檔案不會被 commit）：
      ```bash

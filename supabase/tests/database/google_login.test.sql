@@ -31,6 +31,8 @@ select lives_ok(
   'a lower-case address goes in'
 );
 
+-- Closed explicitly, so this doesn't depend on what an earlier session left in a local database.
+update public.settings set value = 'false' where key = 'notes_enabled';
 select is(
   public.post_note('g1', 'm1', 'a', 'b', 0::smallint, null), '{"error": "notes_closed"}'::jsonb,
   'no notes while the guestbook is closed'

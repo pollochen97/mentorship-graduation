@@ -202,6 +202,18 @@ function Gate({ member, variant, tone }: { member: Member; variant: Variant; ton
   } else if (member.status === "signedOut") {
     text = "留言限 ENG 夥伴，請先用 Google 登入。";
     actions = <Button onClick={signIn}>用 Google 登入</Button>;
+  } else if (member.status === "signedIn" && member.access === "checking") {
+    text = `正在確認 ${member.email} 是否在 ENG 名單內…`;
+  } else if (member.status === "signedIn" && member.access === "error") {
+    text = `無法確認 ${member.email} 是否在 ENG 名單內，請檢查網路後再試一次。`;
+    actions = (
+      <>
+        <Button onClick={recheck}>再試一次</Button>
+        <Button variant="secondary" onClick={signIn}>
+          換帳號
+        </Button>
+      </>
+    );
   } else if (member.status === "signedIn") {
     text = `${member.email} 不在 ENG 名單內。`;
     actions = (
@@ -239,7 +251,8 @@ export function NotePad({
   enabled: boolean | null;
 }) {
   const { member, signOut, recheck } = useMember();
-  const writer = member.status === "signedIn" && member.allowed !== false ? member : null;
+  // Only once the server has confirmed the address: no form while asking or after asking failed.
+  const writer = member.status === "signedIn" && member.access === "allowed" ? member : null;
   const draft = useDraft(post, writer?.name ?? "", recheck);
   const [open, setOpen] = useState(false);
 

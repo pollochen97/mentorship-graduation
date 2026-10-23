@@ -7,7 +7,8 @@
 //   __mock.pause() / resume()  settings:update     __mock.photo()      photo:final
 //   __mock.offline() / online()  Realtime drops / comes back; danmaku then only reach pollers
 //   __mock.list("m1")        ids of a guestbook's notes
-//   __mock.auth("none" | "denied" | "allowed")   the guestbook's Google sign-in (#55); starts "allowed"
+//   __mock.auth("none" | "checking" | "error" | "denied" | "allowed")
+//                            the guestbook's Google sign-in (#55); starts "allowed"
 //   __mock.notes(false) / notes(true)            close / open the guestbooks (settings:update)
 // Add ?mockLatency=1500 to the URL to make every mock request take 1.5 s (default 200 ms).
 import type { ApiResult } from "../api";
@@ -97,8 +98,11 @@ function secondsLeft(last: number, gap: number) {
 
 // ---- Google sign-in (#55) ----
 
-/** Signed out, signed in but off the whitelist, or signed in and allowed to write notes. */
-export type MockAuth = "none" | "denied" | "allowed";
+/**
+ * Signed out, or signed in and the whitelist is being checked, couldn't be checked, says no or yes.
+ * "error" turns into "allowed" when the reader retries.
+ */
+export type MockAuth = "none" | "checking" | "error" | "denied" | "allowed";
 let auth: MockAuth = "allowed";
 const authListeners = new Set<() => void>();
 
