@@ -55,7 +55,7 @@ export const SECTIONS: Record<SectionKey, Section> = {
       { src: audition_03, alt: "海選 3" },
       { src: audition_04, alt: "海選 4" },
     ],
-    steps: ["線上報名", "書面審查", "面試", "錄取通知"],
+    steps: ["線上報名", "書面審查", "海選", "錄取通知"],
   },
   welcome: {
     tag: "WELCOME",
