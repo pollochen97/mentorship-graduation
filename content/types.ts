@@ -51,7 +51,7 @@ export type Section = {
   steps?: string[];
 };
 
-/** One of the six final projects (#12). */
+/** One of the final projects (#12). */
 export type Project = {
   id: string;
   name: string;
@@ -59,6 +59,4 @@ export type Project = {
   team?: string;
   /** Path under public/, e.g. "/photos/final/p1.jpg". */
   image?: string;
-  /** Where the QR code points. */
-  url: string;
 };
