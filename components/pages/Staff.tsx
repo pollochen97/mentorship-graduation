@@ -7,10 +7,24 @@ import { ICONS } from "./sailors/Avatar";
 import type { AvatarIcon } from "./sailors/avatars";
 import styles from "./staff/Staff.module.css";
 
-/** People per page: 5 × 2 cards. More than this and the chapter takes another page. */
-const PER_PAGE = 10;
+/** Cards per row; the grid is 5 × 2. */
+const COLS = 5;
+/** People per page. More than this and the chapter takes another page. */
+const PER_PAGE = COLS * 2;
+
+/** The 助教 start a new row, so 船長, 客座講師 and 引水人 keep the top row; null is an empty slot. */
+const firstAssistant = STAFF.findIndex((member) => member.role === "助教");
+const SLOTS: (StaffMember | null)[] =
+  firstAssistant > 0
+    ? [
+        ...STAFF.slice(0, firstAssistant),
+        ...Array<null>((COLS - (firstAssistant % COLS)) % COLS).fill(null),
+        ...STAFF.slice(firstAssistant),
+      ]
+    : STAFF;
+
 /** For the page registry (pages.ts), so a longer list gets its pages without touching it again. */
-export const STAFF_PAGES = Math.max(1, Math.ceil(STAFF.length / PER_PAGE));
+export const STAFF_PAGES = Math.max(1, Math.ceil(SLOTS.length / PER_PAGE));
 
 /** Each role gets its own label colour and, for people without a photo, its own sea motif. */
 const ROLES: Record<string, { tone: Accent; icon: AvatarIcon }> = {
@@ -46,9 +60,9 @@ function Portrait({ member }: { member: StaffMember }) {
 
 /** 工作人員: role, name and a one-line intro for everyone in content/staff.ts, 10 to a page. */
 export function Staff({ no, label, pageIndex, pageCount }: PageProps) {
-  const onPage = STAFF.slice(pageIndex * PER_PAGE, (pageIndex + 1) * PER_PAGE);
+  const onPage = SLOTS.slice(pageIndex * PER_PAGE, (pageIndex + 1) * PER_PAGE);
   // If anyone on the page has an intro, every card keeps room for one, so the portraits line up.
-  const withIntros = onPage.some((member) => member.intro);
+  const withIntros = onPage.some((member) => member?.intro);
 
   return (
     <div className={styles.page}>
@@ -63,18 +77,22 @@ export function Staff({ no, label, pageIndex, pageCount }: PageProps) {
         </p>
       </header>
       <ul className={styles.grid}>
-        {onPage.map((member) => (
-          <li key={`${member.role}-${member.name}`} className={styles.card}>
-            <Portrait member={member} />
-            <div className={styles.body}>
-              <span className={styles.role} data-tone={(ROLES[member.role] ?? OTHER_ROLE).tone}>
-                {member.role}
-              </span>
-              <span className={styles.name}>{member.name}</span>
-              {withIntros && <p className={styles.intro}>{member.intro}</p>}
-            </div>
-          </li>
-        ))}
+        {onPage.map((member, i) =>
+          member === null ? (
+            <li key={`gap-${i}`} aria-hidden />
+          ) : (
+            <li key={`${member.role}-${member.name}`} className={styles.card}>
+              <Portrait member={member} />
+              <div className={styles.body}>
+                <span className={styles.role} data-tone={(ROLES[member.role] ?? OTHER_ROLE).tone}>
+                  {member.role}
+                </span>
+                <span className={styles.name}>{member.name}</span>
+                {withIntros && <p className={styles.intro}>{member.intro}</p>}
+              </div>
+            </li>
+          ),
+        )}
       </ul>
     </div>
   );

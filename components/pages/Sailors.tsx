@@ -8,8 +8,18 @@ import type { Sailor } from "@/content/types";
 import { Avatar } from "./sailors/Avatar";
 import styles from "./sailors/Sailors.module.css";
 
-/** Sailors per page: two pages of 6 × 2 (spec 2, chapter 03). */
-const PER_PAGE = 12;
+/** Cards per row; each page is 6 × 2 (spec 2, chapter 03). */
+const COLS = 6;
+/** Sailors per page. */
+const PER_PAGE = COLS * 2;
+
+/** The 水手 start a new row, so the 航海士 keep the top row; null is an empty slot. */
+const navigatorCount = SAILORS.filter((sailor) => sailor.rank === "航海士").length;
+const SLOTS: (Sailor | null)[] = [
+  ...SAILORS.slice(0, navigatorCount),
+  ...Array<null>((COLS - (navigatorCount % COLS)) % COLS).fill(null),
+  ...SAILORS.slice(navigatorCount),
+];
 
 const RANK_TONE: Record<Sailor["rank"], Tone> = { 航海士: "yellow", 水手: "mint" };
 
@@ -24,7 +34,7 @@ export function Sailors({ no, label, pageIndex, pageCount }: PageProps) {
   const [open, setOpen] = useState(false);
   // Kept after closing so the dialog doesn't flash empty before it closes.
   const [shown, setShown] = useState<Sailor | null>(null);
-  const onPage = SAILORS.slice(pageIndex * PER_PAGE, (pageIndex + 1) * PER_PAGE);
+  const onPage = SLOTS.slice(pageIndex * PER_PAGE, (pageIndex + 1) * PER_PAGE);
 
   return (
     <div className={styles.page}>
@@ -39,29 +49,33 @@ export function Sailors({ no, label, pageIndex, pageCount }: PageProps) {
         </p>
       </header>
       <ul className={styles.grid}>
-        {onPage.map((sailor) => (
-          <li key={sailor.id} className={styles.cell}>
-            <button
-              type="button"
-              className={styles.card}
-              aria-haspopup="dialog"
-              onClick={() => {
-                setShown(sailor);
-                setOpen(true);
-              }}
-            >
-              <span className={styles.strip} aria-hidden>
-                <span className={styles.stripLabel}>CREW ID</span>
-                <span>{numberOf(sailor)}</span>
-              </span>
-              <Avatar sailor={sailor} sizes="14vw" className={styles.cardAvatar} />
-              <span className={styles.rank} data-tone={RANK_TONE[sailor.rank]}>
-                {sailor.rank}
-              </span>
-              <span className={styles.name}>{sailor.name}</span>
-            </button>
-          </li>
-        ))}
+        {onPage.map((sailor, i) =>
+          sailor === null ? (
+            <li key={`gap-${i}`} aria-hidden />
+          ) : (
+            <li key={sailor.id} className={styles.cell}>
+              <button
+                type="button"
+                className={styles.card}
+                aria-haspopup="dialog"
+                onClick={() => {
+                  setShown(sailor);
+                  setOpen(true);
+                }}
+              >
+                <span className={styles.strip} aria-hidden>
+                  <span className={styles.stripLabel}>CREW ID</span>
+                  <span>{numberOf(sailor)}</span>
+                </span>
+                <Avatar sailor={sailor} sizes="14vw" className={styles.cardAvatar} />
+                <span className={styles.rank} data-tone={RANK_TONE[sailor.rank]}>
+                  {sailor.rank}
+                </span>
+                <span className={styles.name}>{sailor.name}</span>
+              </button>
+            </li>
+          ),
+        )}
       </ul>
       <Modal open={open} onClose={() => setOpen(false)} title={shown?.name}>
         {shown && <SailorFile sailor={shown} />}
