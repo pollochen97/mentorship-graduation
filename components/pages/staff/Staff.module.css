@@ -28,7 +28,7 @@
   text-align: right;
 }
 
-/* Always 4 × 2, so cards keep their size however many people are on the page. */
+/* Always 5 × 2, so cards keep their size however many people are on the page. */
 .grid {
   flex: 1;
   min-height: 0;
@@ -36,7 +36,7 @@
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template: repeat(2, minmax(0, 1fr)) / repeat(4, minmax(0, 1fr));
+  grid-template: repeat(2, minmax(0, 1fr)) / repeat(5, minmax(0, 1fr));
   gap: var(--space-md);
 }
 
@@ -90,7 +90,7 @@
 
 .name {
   max-width: 100%;
-  font: 700 clamp(12px, 2.4cqw, 61px) / 1.15 var(--f-display);
+  font: 700 clamp(11px, 2.1cqw, 54px) / 1.15 var(--f-display);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
