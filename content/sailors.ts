@@ -2,27 +2,27 @@
 // TODO(#6): add mottos, and photos and LinkedIn only for crew members who agreed to make them public.
 import type { Sailor } from "./types";
 
-const NAVIGATORS = ["Otto Liu", "Aaron Shih", "Fane Kung", "Simon Hung"];
+const NAVIGATORS = ["Otto", "Aaron", "Fane", "Simon"];
 
 const SAILOR_NAMES = [
   "Celine",
-  "Jessy Lee",
-  "Hannah Chen",
-  "Lyon Lu",
-  "Jessica Chou",
-  "Jui-Hung Kao",
-  "Serene Chao",
-  "Will Chen",
-  "Wynn Su",
-  "KK Huang",
-  "Jason Chien",
-  "Katlyn Jiang",
-  "Kelly Ko",
-  "Alson Duan",
-  "Benjamin Chien",
-  "Francis Fong",
-  "Ilene Huang",
-  "ChengHsuan Tai",
+  "Jessy",
+  "Hannah",
+  "Lyon",
+  "Jessica",
+  "Jui-Hung",
+  "Serene",
+  "Will",
+  "Wynn",
+  "KK",
+  "Jason",
+  "Katlyn",
+  "Kelly",
+  "Alson",
+  "Benjamin",
+  "Francis",
+  "Ilene",
+  "ChengHsuan",
 ];
 
 // Ids follow the list order and must not change once assigned: they pick the illustrated avatar.

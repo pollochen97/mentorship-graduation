@@ -7,8 +7,8 @@ import { ICONS } from "./sailors/Avatar";
 import type { AvatarIcon } from "./sailors/avatars";
 import styles from "./staff/Staff.module.css";
 
-/** People per page: 4 × 2 cards. More than this and the chapter takes another page. */
-const PER_PAGE = 8;
+/** People per page: 5 × 2 cards. More than this and the chapter takes another page. */
+const PER_PAGE = 10;
 /** For the page registry (pages.ts), so a longer list gets its pages without touching it again. */
 export const STAFF_PAGES = Math.max(1, Math.ceil(STAFF.length / PER_PAGE));
 
@@ -44,7 +44,7 @@ function Portrait({ member }: { member: StaffMember }) {
   );
 }
 
-/** 工作人員: role, name and a one-line intro for everyone in content/staff.ts, 8 to a page. */
+/** 工作人員: role, name and a one-line intro for everyone in content/staff.ts, 10 to a page. */
 export function Staff({ no, label, pageIndex, pageCount }: PageProps) {
   const onPage = STAFF.slice(pageIndex * PER_PAGE, (pageIndex + 1) * PER_PAGE);
   // If anyone on the page has an intro, every card keeps room for one, so the portraits line up.

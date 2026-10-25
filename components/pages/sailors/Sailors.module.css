@@ -130,8 +130,7 @@
 .name {
   max-width: 100%;
   padding: 0 var(--space-sm);
-  /* Sized so full English names (up to ~14 characters, e.g. "ChengHsuan Tai") fit on one line. */
-  font: 700 clamp(8px, 1.35cqw, 34px) / 1.2 var(--f-display);
+  font: 700 clamp(9px, 1.7cqw, 43px) / 1.2 var(--f-display);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
