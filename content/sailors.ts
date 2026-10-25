@@ -1,31 +1,28 @@
-// The 24 學員 for the 學員介紹 pages (#10): 4 航海士 first, then 20 水手.
-// TODO(#6): fill in the names marked 待提供; add mottos, and photos and LinkedIn only for crew
-// members who agreed to make them public.
+// The 22 學員 for the 學員介紹 pages (#10): 4 航海士 first, then 18 水手.
+// TODO(#6): add mottos, and photos and LinkedIn only for crew members who agreed to make them public.
 import type { Sailor } from "./types";
 
-const NAVIGATORS = ["Otto", "Aaron", "Fane", "待提供"];
+const NAVIGATORS = ["Otto Liu", "Aaron Shih", "Fane Kung", "Simon Hung"];
 
 const SAILOR_NAMES = [
   "Celine",
-  "Jessy",
-  "琪雯",
-  "文凱",
-  "Pei Hsuan",
-  "Ray",
-  "Serene",
-  "Will",
-  "Wynn",
-  "KK",
-  "Jason",
-  "Katlyn",
-  "Kelly",
-  "Alson",
-  "Ben",
-  "小馮",
-  "待提供",
-  "待提供",
-  "待提供",
-  "待提供",
+  "Jessy Lee",
+  "Hannah Chen",
+  "Lyon Lu",
+  "Jessica Chou",
+  "Jui-Hung Kao",
+  "Serene Chao",
+  "Will Chen",
+  "Wynn Su",
+  "KK Huang",
+  "Jason Chien",
+  "Katlyn Jiang",
+  "Kelly Ko",
+  "Alson Duan",
+  "Benjamin Chien",
+  "Francis Fong",
+  "Ilene Huang",
+  "ChengHsuan Tai",
 ];
 
 // Ids follow the list order and must not change once assigned: they pick the illustrated avatar.
