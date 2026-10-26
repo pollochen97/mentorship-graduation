@@ -21,6 +21,7 @@ const { values: args } = parseArgs({
     think: { type: "string", default: "40" },
     "burst-at": { type: "string" },
     ips: { type: "string", default: "0" },
+    screens: { type: "string", default: "2" },
     "no-listen": { type: "boolean", default: false },
     out: { type: "string" },
   },
@@ -39,6 +40,10 @@ const BURST_AT_S = args["burst-at"] === undefined ? null : Number(args["burst-at
 /** Everyone in the burst sends within this many seconds of it. */
 const BURST_SPREAD_S = 10;
 const IPS = Number(args.ips);
+/** Projectors subscribed to `live` at the event, for the Realtime estimate. */
+const SCREENS = Number(args.screens);
+/** Supabase's free-plan Realtime limit, in events (sends + receives) per second. */
+const REALTIME_EVENTS_PER_S = 100;
 const TIMEOUT_MS = 15_000;
 /** The form's limits (spec 6.2), used only to tell which limit a 429 came from. */
 const CID_GAP_MS = 5_000;
@@ -225,6 +230,7 @@ function summarize() {
       thinkS: THINK_S,
       burstAtS: BURST_AT_S,
       ips: IPS,
+      screens: SCREENS,
     },
     pageLoads: {
       total: pageLoads.length,
@@ -276,6 +282,13 @@ function summarize() {
       p95Ms: percentile(delays, 95),
       statusChanges: liveStatus,
     },
+    // Supabase counts each broadcast once as it is sent and once more per subscriber receiving it.
+    realtime: {
+      screens: SCREENS,
+      peakEventsPerSecond: peakPerSecond * (1 + SCREENS),
+      peakEventsPerSecondInTest: peakPerSecond * (1 + SCREENS + (liveStatus.length > 0 ? 1 : 0)),
+      limitPerSecond: REALTIME_EVENTS_PER_S,
+    },
   };
 }
 
@@ -311,10 +324,17 @@ function report(s) {
       `投影端（Realtime）：收到 ${s.live.received} / ${p.ok} 則，漏掉 ${s.live.missing}`,
       `  送出到收到 p50 ${ms(s.live.p50Ms)}、p95 ${ms(s.live.p95Ms)}`,
       `  斷線 ${drops.length} 次${drops.length ? "：" + drops.map((d) => `${(d.at / 1000).toFixed(0)}s ${d.status}`).join("、") : ""}`,
-      // Each accepted danmaku is one message per subscriber: the projector(s) plus this listener.
-      `  估計 Realtime 訊息量：最忙的一秒約 ${p.peakOkPerSecond} × 訂閱數（投影機 + 這支監聽）則；免費方案上限每秒 100 則`,
+      "",
     );
   }
+  const rt = s.realtime;
+  lines.push(
+    `估計 Realtime 事件量（每則 = 送出 1 + 每個訂閱者各收 1）：`,
+    `  活動當天：最忙的一秒 ${p.peakOkPerSecond} × (1 + ${rt.screens} 台投影機) = ${rt.peakEventsPerSecond} 個/秒` +
+      (rt.peakEventsPerSecond > rt.limitPerSecond ? " ⚠️ 超過" : "") +
+      `；免費方案上限每秒 ${rt.limitPerSecond} 個`,
+    `  這次測試（多算這支監聽）：${rt.peakEventsPerSecondInTest} 個/秒`,
+  );
   console.log(lines.join("\n"));
 }
 
