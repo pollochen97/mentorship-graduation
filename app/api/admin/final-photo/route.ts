@@ -4,6 +4,8 @@
 //   the browser PUTs the JPEG to signedUrl
 //   PUT { path } → Settings: checks the file is there, saves its public URL in settings and sends
 //   photo:final, so the projector swaps the photo in at once
+// DELETE → Settings (#64): back to no photo, e.g. after the rehearsal's test upload. Sends
+// settings:update, so the projector shows "waiting for the photo" again. The files stay in Storage.
 import { randomBytes } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { errorResponse, readJson } from "@/lib/http";
@@ -61,4 +63,23 @@ export async function PUT(request: NextRequest) {
 
   const settings = await readSettings();
   return settings ? Response.json(settings) : errorResponse("server_error");
+}
+
+export async function DELETE(request: NextRequest) {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
+
+  // Removing the row is "no photo" to toSettings(); the next upload's upsert adds it back. (Writing a
+  // null value would arrive as SQL NULL, which the column refuses, not as the jsonb null it seeds.)
+  const { error } = await supabaseAdmin().from("settings").delete().eq("key", "final_photo_url");
+  if (error) {
+    console.error("[DELETE /api/admin/final-photo]", error.message);
+    return errorResponse("server_error");
+  }
+  // photo:final always carries a photo, so clearing goes out as settings:update, which replaces
+  // the projector's settings.
+  const settings = await readSettings();
+  if (!settings) return errorResponse("server_error");
+  await broadcast("settings:update", settings);
+  return Response.json(settings);
 }

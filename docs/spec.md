@@ -93,7 +93,7 @@
   - 留言開關（開放或關閉留言板，見 3.1）
   - 最新 50 則彈幕列表，可單則下架（投影端即時移除）
   - 留言列表，可隱藏／取消隱藏
-  - 上傳大合照
+  - 上傳大合照；也可以清除大合照，讓投影回到「等待合照上傳中…」（彩排測試後使用，#64）
   - 編輯髒話詞庫（可留到下一版；第一版先寫在程式裡）
 
 ### 3.5 只讓投影電腦訂閱 Realtime
@@ -199,6 +199,7 @@ Vercel 是 serverless，無法維持長連線，所以即時推播交給 Supabas
 | PATCH | `/api/admin/notes/[id]` | 隱藏／取消隱藏留言 | `note:hide` |
 | PUT | `/api/admin/settings` | 彈幕總開關、留言開關 | `settings:update` |
 | POST | `/api/admin/final-photo` | 取得上傳用的 signed URL，上傳完成後寫入 `settings` | `photo:final` |
+| DELETE | `/api/admin/final-photo` | 清除大合照（#64） | `settings:update` |
 
 ### 5.4 專案結構
 
