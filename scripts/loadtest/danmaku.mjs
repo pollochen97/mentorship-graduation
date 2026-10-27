@@ -31,17 +31,41 @@ if (!args.url) {
   console.error("用法：node scripts/loadtest/danmaku.mjs --url <網站網址> [選項]（見 README.md）");
   process.exit(2);
 }
+/**
+ * A numeric option, checked before anything connects: "5m" or "" would become NaN or 0, and a NaN
+ * duration never ends the run.
+ */
+function option(name, { min, max = Infinity, integer = false }) {
+  const value = Number(args[name]);
+  const ok =
+    args[name].trim() !== "" &&
+    Number.isFinite(value) &&
+    value >= min &&
+    value <= max &&
+    (!integer || Number.isInteger(value));
+  if (!ok) {
+    const range = max === Infinity ? ` ${min} 以上` : ` ${min}–${max} 之間`;
+    // The non-integer options are all seconds.
+    const kind = integer ? "整數" : "秒數（不要加單位）";
+    console.error(`--${name} 要是${range}的${kind}，收到「${args[name]}」`);
+    process.exit(2);
+  }
+  return value;
+}
+
 const BASE = args.url.replace(/\/$/, "");
-const USERS = Number(args.users);
-const DURATION_S = Number(args.duration);
-const RAMP_S = Number(args.ramp);
-const THINK_S = Number(args.think);
-const BURST_AT_S = args["burst-at"] === undefined ? null : Number(args["burst-at"]);
+const USERS = option("users", { min: 1, integer: true });
+const DURATION_S = option("duration", { min: 1 });
+const RAMP_S = option("ramp", { min: 0 });
+const THINK_S = option("think", { min: 0 });
+const BURST_AT_S =
+  args["burst-at"] === undefined ? null : option("burst-at", { min: 0, max: DURATION_S });
 /** Everyone in the burst sends within this many seconds of it. */
 const BURST_SPREAD_S = 10;
-const IPS = Number(args.ips);
+// The fake addresses are 10.0.x.y, so at most 256 × 256 of them.
+const IPS = option("ips", { min: 0, max: 65_536, integer: true });
 /** Projectors subscribed to `live` at the event, for the Realtime estimate. */
-const SCREENS = Number(args.screens);
+const SCREENS = option("screens", { min: 0, integer: true });
 /** Supabase's free-plan Realtime limit, in events (sends + receives) per second. */
 const REALTIME_EVENTS_PER_S = 100;
 const TIMEOUT_MS = 15_000;
@@ -211,15 +235,26 @@ function summarize() {
   const errors = posts.filter((p) => !["ok", "429-cid", "429-ip"].includes(p.kind));
   const errorKinds = Object.groupBy(errors, (p) => p.kind);
 
-  // Accepted danmaku per second, at the busiest second.
-  const perSecond = new Map();
-  for (const p of ok)
-    perSecond.set(Math.floor(p.at / 1000), (perSecond.get(Math.floor(p.at / 1000)) ?? 0) + 1);
-  const peakPerSecond = Math.max(0, ...perSecond.values());
+  // The busiest second, two ways. Requests that start in different seconds can broadcast in the same
+  // one (each waits for the database first), so the request count can understate the Realtime peak;
+  // the listener's arrival times show when the broadcasts actually went out.
+  const busiestSecond = (times) => {
+    const perSecond = new Map();
+    for (const t of times)
+      perSecond.set(Math.floor(t / 1000), (perSecond.get(Math.floor(t / 1000)) ?? 0) + 1);
+    return Math.max(0, ...perSecond.values());
+  };
+  const peakRequestsPerSecond = busiestSecond(ok.map((p) => p.at));
 
-  const delays = [...sentAt]
-    .filter(([id]) => receivedAt.has(id))
-    .map(([id, t]) => receivedAt.get(id) - t);
+  const delivered = [...sentAt].filter(([id]) => receivedAt.has(id));
+  const delays = delivered.map(([id, t]) => receivedAt.get(id) - t);
+  const listened = liveStatus.length > 0;
+  // Only this test's danmaku: anything else on `live` (a real guest) isn't load we generated.
+  const peakBroadcastsPerSecond = listened
+    ? busiestSecond(delivered.map(([id]) => receivedAt.get(id)))
+    : null;
+  // Without the listener, the request count is the best estimate there is.
+  const peakForRealtime = Math.max(peakRequestsPerSecond, peakBroadcastsPerSecond ?? 0);
 
   return {
     target: BASE,
@@ -264,7 +299,7 @@ function summarize() {
         95,
       ),
       okPerMinute: ok.length / (DURATION_S / 60),
-      peakOkPerSecond: peakPerSecond,
+      peakOkPerSecond: peakRequestsPerSecond,
       perHalfMinute: Array.from({ length: Math.ceil(DURATION_S / 30) }, (_, i) => {
         const inSlot = posts.filter((p) => Math.floor(p.at / 30_000) === i);
         return {
@@ -275,18 +310,21 @@ function summarize() {
       }),
     },
     live: {
-      listened: liveStatus.length > 0,
+      listened,
       received: delays.length,
-      missing: liveStatus.length > 0 ? ok.length - delays.length : null,
+      missing: listened ? ok.length - delays.length : null,
       p50Ms: percentile(delays, 50),
       p95Ms: percentile(delays, 95),
+      peakPerSecond: peakBroadcastsPerSecond,
       statusChanges: liveStatus,
     },
     // Supabase counts each broadcast once as it is sent and once more per subscriber receiving it.
     realtime: {
       screens: SCREENS,
-      peakEventsPerSecond: peakPerSecond * (1 + SCREENS),
-      peakEventsPerSecondInTest: peakPerSecond * (1 + SCREENS + (liveStatus.length > 0 ? 1 : 0)),
+      peakBroadcastsPerSecond: peakForRealtime,
+      measured: listened,
+      peakEventsPerSecond: peakForRealtime * (1 + SCREENS),
+      peakEventsPerSecondInTest: peakForRealtime * (1 + SCREENS + (listened ? 1 : 0)),
       limitPerSecond: REALTIME_EVENTS_PER_S,
     },
   };
@@ -310,7 +348,7 @@ function report(s) {
     `  429 IP 限流     ${p.limitedIp}（${pct(p.limitedIp, p.total)}）`,
     `  其他錯誤        ${p.errors}（${pct(p.errors, p.total)}）${p.errors ? " " + JSON.stringify(p.errorKinds) : ""}`,
     `  延遲 p50 ${ms(p.p50Ms)}、p95 ${ms(p.p95Ms)}、p99 ${ms(p.p99Ms)}（成功的 p95 ${ms(p.okP95Ms)}）`,
-    `  上牆量：平均每分鐘 ${p.okPerMinute.toFixed(0)} 則，最忙的一秒 ${p.peakOkPerSecond} 則`,
+    `  上牆量：平均每分鐘 ${p.okPerMinute.toFixed(0)} 則，最忙的一秒（依送出時間）${p.peakOkPerSecond} 則`,
     "",
     "  每 30 秒（成功／送出）：",
     ...p.perHalfMinute.map(
@@ -323,6 +361,7 @@ function report(s) {
     lines.push(
       `投影端（Realtime）：收到 ${s.live.received} / ${p.ok} 則，漏掉 ${s.live.missing}`,
       `  送出到收到 p50 ${ms(s.live.p50Ms)}、p95 ${ms(s.live.p95Ms)}`,
+      `  最忙的一秒（依收到時間）${s.live.peakPerSecond} 則`,
       `  斷線 ${drops.length} 次${drops.length ? "：" + drops.map((d) => `${(d.at / 1000).toFixed(0)}s ${d.status}`).join("、") : ""}`,
       "",
     );
@@ -330,7 +369,8 @@ function report(s) {
   const rt = s.realtime;
   lines.push(
     `估計 Realtime 事件量（每則 = 送出 1 + 每個訂閱者各收 1）：`,
-    `  活動當天：最忙的一秒 ${p.peakOkPerSecond} × (1 + ${rt.screens} 台投影機) = ${rt.peakEventsPerSecond} 個/秒` +
+    ...(rt.measured ? [] : ["  ⚠️ 沒有監聽投影端，最忙的一秒只能用送出時間估計，可能偏低"]),
+    `  活動當天：最忙的一秒 ${rt.peakBroadcastsPerSecond} × (1 + ${rt.screens} 台投影機) = ${rt.peakEventsPerSecond} 個/秒` +
       (rt.peakEventsPerSecond > rt.limitPerSecond ? " ⚠️ 超過" : "") +
       `；免費方案上限每秒 ${rt.limitPerSecond} 個`,
     `  這次測試（多算這支監聽）：${rt.peakEventsPerSecondInTest} 個/秒`,
