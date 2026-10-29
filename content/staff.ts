@@ -9,7 +9,7 @@ export const STAFF: StaffMember[] = [
   { role: "引水人", name: "Lukas" },
   { role: "助教", name: "周杰" },
   { role: "助教", name: "沈亞竺" },
-  { role: "助教", name: "嚴以軒" },
+  { role: "助理", name: "嚴以軒" },
   { role: "助理", name: "Lawrence" },
   { role: "助理", name: "Hannah" },
 ];
