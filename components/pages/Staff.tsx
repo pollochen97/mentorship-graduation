@@ -40,7 +40,9 @@ function Portrait({ member }: { member: StaffMember }) {
   return (
     <span className={styles.portrait} data-tone={tone}>
       {member.photo ? (
-        <Image src={member.photo} alt="" fill sizes="22vw" className={styles.photo} />
+        <span className={styles.photo}>
+          <Image src={member.photo} alt="" fill sizes="12vw" />
+        </span>
       ) : (
         <svg
           viewBox="0 0 64 64"

@@ -62,6 +62,15 @@
 }
 
 .photo {
+  position: relative;
+  height: 86%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: var(--line);
+  border-radius: 50%;
+}
+
+.photo img {
   object-fit: cover;
 }
 
