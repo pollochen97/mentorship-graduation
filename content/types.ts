@@ -12,17 +12,25 @@ export type StaffMember = {
   photo?: string;
 };
 
+export type SailorLink = {
+  /** Shown as the link text, e.g. "LinkedIn". */
+  label: string;
+  /** Full URL. */
+  url: string;
+};
+
 export type Sailor = {
   /** Stable id, e.g. "s07"; also picks the illustrated avatar for sailors without a photo. */
   id: string;
   /** Shown on the card; 航海士 come first in the list. */
   rank: "航海士" | "水手";
   name: string;
+  /** Shown under 我想說...; a motto or a line or two. */
   motto?: string;
   /** Path under public/; only for sailors who agreed to show it. */
   photo?: string;
-  /** Full URL; only for sailors who agreed to show it. */
-  linkedin?: string;
+  /** Social links, e.g. LinkedIn or IG; only for sailors who agreed to show them. */
+  links?: SailorLink[];
 };
 
 export type SectionKey = "audition" | "welcome" | "m1" | "m2" | "m3" | "m4" | "meetups";

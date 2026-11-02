@@ -28,7 +28,7 @@ const numberOf = (sailor: Sailor) => `No.${sailor.id.replace(/\D/g, "")}`;
 
 /**
  * 學員介紹: each sailor as a 水手證 (crew card), 航海士 first, 12 to a page. Clicking a card opens their
- * 水手檔案 with the motto and LinkedIn; fields left empty in content/sailors.ts are not shown.
+ * 水手檔案 with their line and social links; fields left empty in content/sailors.ts are not shown.
  */
 export function Sailors({ no, label, pageIndex, pageCount }: PageProps) {
   const [open, setOpen] = useState(false);
@@ -94,26 +94,29 @@ function SailorFile({ sailor }: { sailor: Sailor }) {
         <span className={styles.rank} data-tone={RANK_TONE[sailor.rank]}>
           {sailor.rank}
         </span>
-        {(sailor.motto || sailor.linkedin) && (
+        {(sailor.motto || sailor.links) && (
           <dl className={styles.fields}>
             {sailor.motto && (
               <div>
-                <dt>座右銘</dt>
+                <dt>我想說...</dt>
                 <dd className={styles.motto}>{sailor.motto}</dd>
               </div>
             )}
-            {sailor.linkedin && (
+            {sailor.links && (
               <div>
-                <dt>LinkedIn</dt>
-                <dd>
-                  <a
-                    href={sailor.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.link}
-                  >
-                    {sailor.linkedin.replace(/^https?:\/\/(www\.)?/, "").replace(/\/+$/, "")} ↗
-                  </a>
+                <dt>社群連結</dt>
+                <dd className={styles.links}>
+                  {sailor.links.map((link) => (
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.link}
+                    >
+                      {link.label} ↗
+                    </a>
+                  ))}
                 </dd>
               </div>
             )}
