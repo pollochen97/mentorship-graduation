@@ -191,6 +191,12 @@
   font: 700 clamp(18px, 3cqw, 36px) / 1.4 var(--f-body);
 }
 
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4cqw 2cqw;
+}
+
 .link {
   font: 700 clamp(14px, 1.8cqw, 22px) / 1.3 var(--f-mono);
   color: var(--ink);

@@ -25,7 +25,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 封面 | 標題「ENG曼陀號結業分享」、日期 11/07 Sat.、主視覺圖 | 無 |  |
 | 02 | 工作人員 | 身份（船長、引水人、助教、客座講師…）、姓名、一句介紹 | 無 | 名單待提供；人數多時拆成 2 頁 |
-| 03 | 學員介紹 | 24 位學員（4 位航海士、20 位水手）的姓名、身分和頭像；點擊會跳出「水手檔案」彈窗，顯示座右銘和 LinkedIn | 無 | 照片和 LinkedIn 非必填；沒有照片的人用插畫或動畫頭像；24 人分 2 頁，每頁 12 位 |
+| 03 | 學員介紹 | 24 位學員（4 位航海士、20 位水手）的姓名、身分和頭像；點擊會跳出「水手檔案」彈窗，顯示「我想說...」和社群連結 | 無 | 照片和社群連結非必填；沒有照片的人用插畫或動畫頭像；24 人分 2 頁，每頁 12 位 |
 | 04 | 海選 | 流程（步驟式）、一小段文字、1–2 張照片 | 無 | 文字精簡，快速帶過 |
 | 05 | 相見歡 | 照片分享 | 無 |  |
 | 06 | 第一次月會 | 主題「卓越軟體工程師的知識管理與 AI 賦能」，大綱和照片 | 有 |  |
@@ -43,7 +43,7 @@
 - 可用滾輪、↑↓、PageUp/PageDown（簡報筆）翻頁；按 F 全螢幕、D 開關彈幕
 - 每頁左側是文字欄（章節標籤、標題、日期，加上一小段文字或大綱），右側是照片或內容
 - 照片版型共用同一套模板：hero（1 張）、grid2、grid3（6 張）、mosaic（3 張）
-- 學員的身分、照片、座右銘、LinkedIn 來自 `content/sailors.ts`；欄位是空的就不顯示對應元素
+- 學員的身分、照片、想說的話、社群連結來自 `content/sailors.ts`；欄位是空的就不顯示對應元素
 
 ## 3. 互動功能規格
 
@@ -304,7 +304,7 @@ flowchart LR
 | 3 | BookShell：16:9 翻頁引擎、工具列、快捷鍵、頁面註冊表、12 個 placeholder | `components/book/`、`components/pages/`（只建空檔） | 1 | P0 |
 | 4 | 前端介面：zod schemas、Broadcast 事件型別、hooks 與 mock 模式 | `lib/schemas.ts`、`lib/realtime.ts`、`lib/hooks/` | 1 | P0 |
 | 5 | Supabase：migrations、RLS、private channel 權限、`post_danmaku`／`post_note` function | `supabase/`、`lib/supabase/` | 1 | P0 |
-| 6 | 內容收集：工作人員和學員資料（姓名、身分、照片、座右銘、LinkedIn） | `content/staff.ts`、`content/sailors.ts` | — | content |
+| 6 | 內容收集：工作人員和學員資料（姓名、身分、照片、想說的話、社群連結） | `content/staff.ts`、`content/sailors.ts` | — | content |
 | 7 | 照片整理：各章挑照片、壓縮、寫文案 | `public/photos/`、`content/sections.ts`、`content/projects.ts` | — | content |
 | 8 | 封面頁 | `components/pages/Cover.tsx` | 2, 3 | page |
 | 9 | 工作人員頁 | `components/pages/Staff.tsx` | 2, 3 | page |
@@ -331,7 +331,7 @@ flowchart LR
 ## 8. 待確認事項
 
 - [ ] 工作人員名單：每位的身份、姓名、一句介紹；總人數會決定要不要拆成 2 頁
-- [ ] 學員資料收集方式（建議用 Google 表單），以及是否同意公開照片和 LinkedIn
+- [ ] 學員資料收集方式（建議用 Google 表單），以及是否同意公開照片和社群連結
 - [ ] 8 組專案的名稱、圖片、QR code 要連到的網址
 - [ ] 海選的流程步驟
 - [ ] 各次月會和小聚的日期，以及照片由誰整理
