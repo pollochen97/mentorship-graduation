@@ -6,7 +6,7 @@ ENG曼陀號是一個為期四個月的工程師 mentorship 計畫，共 22 位�
 
 ![投影端：翻頁航海日誌的封面，彈幕飄過畫面，左下角是發送彈幕的 QR code](docs/portfolio/images/cover.png)
 
-<!-- TODO：放上活動當天的影片連結或 GIF -->
+<!-- TODO：介紹影片。上傳到 GitHub 後，把 https://github.com/user-attachments/assets/... 網址單獨放在這一行 -->
 
 | 273 則彈幕 | 92 位來賓參與 | 尖峰每分鐘 76 則 | 當天 0 失誤 |
 | :--------: | :-----------: | :--------------: | :---------: |
