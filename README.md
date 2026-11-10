@@ -2,6 +2,8 @@
 
 **一本在現場投影的翻頁「航海日誌」網站。來賓用手機掃 QR code，彈幕就會即時飄過投影幕。**
 
+**展示站：[mentorship-graduation-demo.vercel.app](https://mentorship-graduation-demo.vercel.app)**（mock 模式：學員、工作人員和照片換成假資料，彈幕是自動產生的。按 F 全螢幕，用方向鍵或滾輪翻頁。）
+
 ENG曼陀號是一個為期四個月的工程師 mentorship 計畫，共 22 位學員。這個網站是 2026/11/07 結業發表的主舞台：回顧四個月的航程，讓現場來賓即時互動，最後拍下的大合照也直接出現在投影幕上。
 
 ![投影端：翻頁航海日誌的封面，彈幕飄過畫面，左下角是發送彈幕的 QR code](docs/portfolio/images/cover.png)
