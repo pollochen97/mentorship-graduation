@@ -107,6 +107,9 @@
 ### 3.6 第二階段（活動後再做）
 
 - **封存**：匯出留言（含暱稱）到 `content/archive.json`，用 `NEXT_PUBLIC_DATA_SOURCE=archive` 切成唯讀靜態網站，之後可停用 Supabase。彈幕不留存
+  - 匯出：`scripts/archive/export-notes.mjs`，只匯出沒被隱藏的留言，欄位和網站上顯示的一樣（不含 email、`user_id`、`client_id`）
+  - 大合照不封存：照片裡有許多來賓，不放進公開的 repo，另外私下分享；封存版的大合照頁會說明
+  - 封存版的 `/danmaku` 顯示「彈幕已關閉」，`/admin` 停用，不再有人登入
 - ~~暱稱、Google 綁定~~：改成活動前就做的 Google 登入加白名單（3.1、#55），不再另外做匿名登入和暱稱
 
 ## 4. UI 設計風格

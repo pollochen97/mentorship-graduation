@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Panel } from "@/components/ui";
+import { ARCHIVE } from "@/lib/archive";
 import { DanmakuForm } from "./DanmakuForm";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "發彈幕 · ENG曼陀號" };
 
 export default function DanmakuPage() {
+  // After the event (spec 3.6) an old QR code still lands here: say it's over instead of a dead form.
+  if (ARCHIVE) {
+    return (
+      <main className={styles.main}>
+        <Panel as="section" tone="paper" className={styles.card}>
+          <p className={styles.kicker}>ENG曼陀號結業分享</p>
+          <h1 className={styles.title}>彈幕已關閉</h1>
+          <p className={styles.lead}>活動已經結束，謝謝大家當天送出的每一則彈幕！</p>
+          <Link href="/">回到網站</Link>
+        </Panel>
+      </main>
+    );
+  }
   return (
     <main className={styles.main}>
       <Panel as="section" tone="paper" className={styles.card}>
