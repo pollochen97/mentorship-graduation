@@ -1,88 +1,138 @@
 # ENG曼陀號結業分享
 
-11/07 Sat. 結業發表活動網站：一本可以翻頁的航海日誌，在現場投影。來賓用手機掃 QR code 就能發彈幕。
+**一本在現場投影的翻頁「航海日誌」網站。來賓用手機掃 QR code，彈幕就會即時飄過投影幕。**
 
-- 需求規格書：[`docs/spec.md`](docs/spec.md)
-- 視覺與互動參考：[`docs/flipbook-demo.html`](docs/flipbook-demo.html)（直接用瀏覽器開啟）
-- 技術：Next.js（App Router）· Vercel · Supabase（Postgres / Realtime Broadcast / Storage）
+ENG曼陀號是一個為期四個月的工程師 mentorship 計畫，共 22 位學員。這個網站是 2026/11/07 結業發表的主舞台：回顧四個月的航程，讓現場來賓即時互動，最後拍下的大合照也直接出現在投影幕上。
 
-## 本機開發
+![投影端：翻頁航海日誌的封面，彈幕飄過畫面，左下角是發送彈幕的 QR code](docs/portfolio/images/cover.png)
 
-需要 Node.js 22 以上（`@supabase/supabase-js` 的最低需求）。有裝 nvm 的話，執行 `nvm use` 就會切到 `.nvmrc` 指定的版本。
+<!-- TODO：介紹影片。上傳到 GitHub 後，把 https://github.com/user-attachments/assets/... 網址單獨放在這一行 -->
 
-```bash
-npm install
-cp .env.example .env.local   # 前端開發保持 NEXT_PUBLIC_USE_MOCK=1，不用填 Supabase
-npm run dev                  # http://localhost:3000
+| 273 則彈幕 | 92 位來賓參與 | 尖峰每分鐘 76 則 | 當天 0 失誤 |
+| :--------: | :-----------: | :--------------: | :---------: |
+
+## 功能
+
+<table>
+<tr>
+<td width="30%"><img src="docs/portfolio/images/danmaku-phone.png" alt="手機彈幕送出頁"></td>
+<td>
+
+### 即時彈幕
+
+來賓掃投影幕左下角的 QR code，在手機上輸入暱稱和一句話（最多 20 字），送出後立刻飄過投影幕。
+
+- 每人每 5 秒 1 則、每 10 分鐘 20 則，在 Postgres 裡限流
+- 過濾髒話與連結（含全形字、零寬字元等變形）
+- 管理員可以在後台一鍵暫停全部彈幕，或下架單則，投影幕即時移除
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width="50%"><img src="docs/portfolio/images/guestbook.png" alt="月會留言板：便條紙格狀排列，右下角是輸入板"></td>
+<td width="50%"><img src="docs/portfolio/images/group-photo-developing.png" alt="大合照頁：照片正在顯影，從泛白模糊逐漸浮現"></td>
+</tr>
+<tr>
+<td>
+
+### 月會留言板
+
+四次月會各有一面便條紙牆，送出時便條會飛到空位「黏上」。只有 ENG 夥伴能留言：用 Google 登入，email 要在白名單裡，開放期間由後台開關控制。
+
+</td>
+<td>
+
+### 大合照即時顯影
+
+活動最後拍下大合照，管理員在手機上按「拍照上傳」，投影幕就換上照片，並播放像暗房一樣的顯影動畫。[怎麼做的 →](docs/portfolio/group-photo.md)
+
+</td>
+</tr>
+</table>
+
+另外還有：16:9 翻頁引擎（滾輪、方向鍵、簡報筆都能翻頁）、學員「水手證」卡片與個人檔案、管理後台。
+
+## 活動當天
+
+![每分鐘彈幕數：13:14 放出 QR code 後，第一分鐘 76 則](docs/portfolio/danmaku-timeline.svg)
+
+- **QR code 放出後的第一分鐘，68% 的參與者（63/92 人）就送出了彈幕。**
+- **原本預期的瓶頸沒有發生。** 壓測主要防範「全場共用 Wi-Fi、同一個 IP」，但當天 92 位來賓來自 90 個不同的 IP。兩種情境活動前都測過，所以系統都在預期範圍內：Realtime 尖峰約每秒 12 個事件，大約是免費方案上限的 12%。
+- **真正接近上限的是投影幕，不是後端。** 尖峰每分鐘 76 則，已經到投影幕容量（約 90 則）的 84%。
+
+完整數據與分析：[活動數據](docs/portfolio/event-stats.md)
+
+## 架構
+
+```mermaid
+flowchart LR
+    phone["來賓手機<br/>/danmaku"] -- POST --> api
+    admin["管理員手機<br/>/admin"] -- POST / PUT --> api
+    admin -. 照片直傳<br/>signed URL .-> storage
+    subgraph vercel["Vercel（sin1）"]
+        api["Next.js API routes"]
+    end
+    subgraph supabase["Supabase（ap-southeast-1）"]
+        pg[("Postgres<br/>RLS + 限流 function")]
+        storage["Storage"]
+        rt["Realtime Broadcast<br/>private channel"]
+    end
+    api -- 寫入 --> pg
+    api -- 廣播 --> rt
+    rt -- 訂閱 --> projector["投影電腦<br/>（唯一的訂閱者）"]
+    storage -. 照片 .-> projector
 ```
 
-| 指令                | 用途                                |
-| ------------------- | ----------------------------------- |
-| `npm run lint`      | ESLint                              |
-| `npm run typecheck` | 先產生 Next.js 路由型別，再跑 `tsc` |
-| `npm run format`    | Prettier 排版                       |
-| `npm run build`     | 正式建置（PR 前請先跑過）           |
+所有資料表寫入都經過 API，瀏覽器沒有任何資料表的寫入權限。大合照的檔案則不經過 API：管理員的手機向 API 取得 signed upload URL 後，直接上傳到 Storage（[流程](docs/portfolio/group-photo.md)）。投影端只透過 Realtime 接收。
 
-> 這是 **Next.js 16**，有不少和舊版不同的地方，例如 middleware 已改名為 `proxy.ts`。寫程式前請先看 `node_modules/next/dist/docs/`（見 `AGENTS.md`）。
+## 技術上的決策
 
-## Supabase
+**即時推播：Supabase Realtime Broadcast，而且只有伺服器能發送。**
+Vercel 是 serverless，無法維持 WebSocket 長連線，所以即時推播交給 Supabase。選 Broadcast 而不是 Postgres Changes，是因為後者每筆變更都要對每個訂閱者檢查權限。頻道設為 private，用 RLS 讓瀏覽器只能接收、不能發送，就算有人拿到公開的 anon key，也沒辦法直接對投影幕洗版。
+→ [`supabase/migrations/…_realtime.sql`](supabase/migrations/20261022000003_realtime.sql)、[`lib/realtime.ts`](lib/realtime.ts)
 
-資料表、限流 function、Realtime 權限和 Storage bucket 都寫在 `supabase/migrations/`，不要在 Dashboard 上手動改。Supabase CLI 已經在 devDependencies 裡，用 `npx supabase` 執行。
+**只讓投影電腦訂閱 Realtime。**
+任何人都能翻書和看留言（只有白名單內的 ENG 夥伴能留言），但只有開過 `/?key=<SCREEN_KEY>`、拿到簽章 cookie（HMAC，48 小時到期）的投影電腦會訂閱，免費方案的連線數和訊息量都留給真正需要的螢幕。
+→ [`lib/screen-gate.ts`](lib/screen-gate.ts)
 
-### 本機（需要 Docker）
+**限流寫在 Postgres function 裡。**
+serverless function 無法在記憶體裡保留計數器，所以把「鎖住這位來賓 → 查最近的彈幕 → 通過才寫入」放在同一個交易裡完成，連點兩下也不會多送一則。
+→ [`supabase/migrations/…_post_functions.sql`](supabase/migrations/20261022000002_post_functions.sql)
 
-```bash
-npx supabase start      # 啟動本機 Supabase 並套用所有 migrations，最後會印出 URL 和 key
-npx supabase db reset   # 改了 migration 後：清空本機資料庫，重新套用
-npx supabase test db    # 跑 supabase/tests/ 裡的資料庫測試
-npm run db:types        # 改了資料表或 function 後：重新產生 lib/supabase/database.types.ts
-npx supabase stop
-```
+**彈幕 id 依 commit 順序產生，斷線時改用輪詢也不會漏。**
+投影端斷線時，每 3 秒用 `GET /api/danmaku?since=<最後一則的 id>` 輪詢。但 identity id 是在寫入時分配的，交易卻可能以不同順序 commit，輪詢的游標可能跳過還沒 commit 的那一則。解法是在寫入前取得一把全域 advisory lock，持有到 commit 為止，讓 id 依可見的順序產生。
+→ [`supabase/migrations/…_danmaku_commit_order.sql`](supabase/migrations/20261022000005_danmaku_commit_order.sql)、[`lib/hooks/useDanmakuStream.ts`](lib/hooks/useDanmakuStream.ts)
 
-要讓網站連本機 Supabase，把 `npx supabase status` 印出的 API URL、anon key、service_role key 填進 `.env.local`，並設 `NEXT_PUBLIC_USE_MOCK=0`。
+**活動前用壓測找出問題。**
+寫了模擬 300 位來賓的壓測腳本，在 preview 環境實測。結果發現 Vercel function 預設跑在美東、Supabase 在新加坡，每則彈幕都要繞半個地球；把 function 移到新加坡後，送出延遲的 p50 從 1.3 秒降到 137 ms。也依壓測結果決定活動當天只開 1 台投影機訂閱。
+→ [`scripts/loadtest/`](scripts/loadtest/)
 
-### 留言板的 Google 登入（#55）
+**為多人並行開發設計的介面與 mock 模式。**
+先定好 zod schemas、Broadcast 事件和 hooks 的介面並凍結，再加上 `NEXT_PUBLIC_USE_MOCK=1` 的 mock 模式（假 API、假的即時事件、可以在 Console 模擬斷線），前端不用等後端，也不用連 Supabase 就能開發。每個 issue 列出負責的檔案，減少多人同時修改同一個檔案。
+→ [`lib/schemas.ts`](lib/schemas.ts)、[`lib/mock/`](lib/mock/)
 
-留言要用 Google 登入，而且 email 要在 `allowed_emails` 資料表裡；後台的「留言開關」打開時才能留言。
+## 我的角色
 
-- **mock 模式**：預設是「已登入、在名單內」、留言開放中。在 Console 用 `__mock.auth("none")`（未登入）、`__mock.auth("checking")`（確認名單中）、`__mock.auth("error")`（確認失敗）、`__mock.auth("denied")`（不在名單內）、`__mock.auth()`（恢復）切換登入狀態，`__mock.notes(false)` / `__mock.notes()` 關閉或開放留言。
-- **本機 Supabase**：需要自己的 Google OAuth client，重新導向 URI 加上 `http://127.0.0.1:54321/auth/v1/callback`。
-  1. 在 `supabase/.env` 填入下面兩個變數（這個檔案不會被 commit）：
-     ```bash
-     SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=
-     SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET=
-     ```
-  2. 把 `supabase/config.toml` 的 `[auth.external.google]` 改成 `enabled = true`，再 `npx supabase stop`、`npx supabase start`。這個修改不要 commit。
-  3. 用 Studio（http://127.0.0.1:54323）在 `allowed_emails` 加入自己的 email（小寫），並把 `settings` 的 `notes_enabled` 改成 `true`。
-- **正式環境**：Google OAuth client、Supabase 的 Google provider 和 Redirect URLs 的設定見 #56。白名單在 Supabase Dashboard 的 Table Editor 維護，**不要放進 repo**。
+我是這個專案的主要開發者：撰寫[需求規格書](docs/spec.md)、拆分 31 個 issue、建立開發流程，並負責大部分的實作（合併的 42 個 PR 中有 34 個），包括翻頁引擎、Supabase 後端與 API、即時彈幕、留言板與 Google 登入、管理後台、大合照上傳與顯影，以及壓測。
 
-### 雲端專案
+團隊夥伴負責了手機彈幕送出頁、Final 專案頁、工作人員與學員名單和照片；「只讓投影電腦訂閱 Realtime」的規格也是由夥伴提出的。
 
-```bash
-npx supabase login                               # 第一次使用：瀏覽器登入
-npx supabase link --project-ref <project-ref>    # 輸入資料庫密碼；project-ref 在 Dashboard 網址裡
-npx supabase db push --dry-run                   # 先看會套用哪些 migration
-npx supabase db push
-```
+開發期間：2026/10/21 – 11/07
 
-新增 migration：`npx supabase migration new <名稱>`，寫好後先在本機 `db reset`、`test db` 通過再發 PR。合併後由一個人執行 `db push`，不要多人同時推。
+## 技術棧
 
-### 給 API route 用的 helper（`lib/supabase/`）
+Next.js 16（App Router）· React 19 · TypeScript · zod · Supabase（Postgres、Realtime Broadcast、Storage、Auth）· Vercel · GitHub Actions（lint、typecheck、測試、Prettier、build）
 
-| 檔案           | 內容                                                                                                                                |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `server.ts`    | `supabaseAdmin()`：service role client，只能在伺服器使用                                                                            |
-| `posts.ts`     | `postDanmaku()`、`postNote()`：呼叫限流 function，回傳資料或錯誤碼（可直接給 `errorResponse`）                                      |
-| `broadcast.ts` | `broadcast(event, payload)`：寫入成功後通知投影端                                                                                   |
-| `rows.ts`      | 資料列（snake_case）轉成 API 格式（camelCase）：`toNote()`、`toDanmaku()`、`toSettings()`                                           |
-| `browser.ts`   | 瀏覽器用的 anon client：`supabaseBrowser()` 給 `lib/realtime.ts` 訂閱用，`supabaseAuth()` 給留言板的 Google 登入（`lib/auth.ts`）用 |
-| `member.ts`    | `readMember()`：驗證請求帶的 Google 登入，並查 email 是否在白名單                                                                   |
+## 文件
 
-## 開發流程
-
-1. 到 Project board 認領 issue：指派給自己，狀態改成 In processing。
-2. 開分支 `feat/<issue編號>-<名稱>`，例如 `feat/10-sailors`。
-3. **只改 issue 列出的「負責的檔案」**。需要動到別人的檔案時，先在該 issue 留言。
-4. 發 PR 時寫上 `Closes #<編號>`，在 Vercel preview 上驗收後用 squash merge 合併。
-5. P0 完成後，介面就凍結了：`lib/schemas.ts`、hook 簽名、Broadcast 事件名稱都不能隨意更改。要改時，開一個標 `contract` 的 PR，並在群組通知大家。
-6. 前端開發時設 `NEXT_PUBLIC_USE_MOCK=1`，不連 Supabase 也能跑。
+| 文件                                            | 內容                                  |
+| ----------------------------------------------- | ------------------------------------- |
+| [活動數據](docs/portfolio/event-stats.md)       | 11/07 彈幕數據、壓測預估和實際的對照  |
+| [大合照即時顯影](docs/portfolio/group-photo.md) | 現場拍照上傳到投影幕的流程與防呆設計  |
+| [需求規格書](docs/spec.md)                      | 功能、資料表、API、Realtime 設計      |
+| [開發指南](docs/development.md)                 | 本機開發、Supabase 設定、團隊開發流程 |
+| [壓力測試](scripts/loadtest/README.md)          | 壓測方式與結果怎麼看                  |
+| [視覺參考](docs/flipbook-demo.html)             | 翻頁與互動的原型（用瀏覽器直接開啟）  |
