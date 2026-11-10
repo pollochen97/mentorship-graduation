@@ -1,6 +1,8 @@
 // Typed browser-side calls to our API (#4). Inputs are checked with the same zod schemas the server
-// uses, and every failure comes back as an ApiError instead of throwing. Mock mode answers locally.
+// uses, and every failure comes back as an ApiError instead of throwing. Mock mode answers locally, and
+// so does archive mode (lib/archive), from the exported notes.
 import type { z } from "zod";
+import { ARCHIVE, archiveApi } from "./archive";
 import { mockApi, USE_MOCK } from "./mock";
 import {
   ApiErrorBody,
@@ -72,6 +74,7 @@ function validate<S extends z.ZodType>(schema: S, input: unknown): ApiResult<z.i
 }
 
 export async function fetchNotes(section: NoteSection): Promise<ApiResult<Note[]>> {
+  if (ARCHIVE) return archiveApi.fetchNotes(section);
   if (USE_MOCK) return mockApi.fetchNotes(section);
   const r = await request(`/api/notes?section=${section}`, NotesResponse);
   return r.ok ? { ok: true, data: r.data.notes } : r;
@@ -87,6 +90,7 @@ async function bearer() {
 export async function sendNote(input: NoteInput): Promise<ApiResult<Note>> {
   const valid = validate(NoteInput, input);
   if (!valid.ok) return valid;
+  if (ARCHIVE) return archiveApi.sendNote();
   if (USE_MOCK) return mockApi.sendNote(valid.data);
   const headers = await bearer();
   if (!headers) return failure("unauthorized", "請先登入");
@@ -106,6 +110,7 @@ export async function fetchMe(token: string): Promise<ApiResult<Me>> {
 export async function sendDanmaku(input: DanmakuInput): Promise<ApiResult<Danmaku>> {
   const valid = validate(DanmakuInput, input);
   if (!valid.ok) return valid;
+  if (ARCHIVE) return archiveApi.sendDanmaku();
   if (USE_MOCK) return mockApi.sendDanmaku(valid.data);
   const r = await request("/api/danmaku", DanmakuResponse, {
     method: "POST",
@@ -116,12 +121,14 @@ export async function sendDanmaku(input: DanmakuInput): Promise<ApiResult<Danmak
 
 /** Danmaku newer than `since` (an id), oldest first. Used by the projector's polling fallback. */
 export async function fetchDanmakuSince(since: number): Promise<ApiResult<Danmaku[]>> {
+  if (ARCHIVE) return archiveApi.fetchDanmakuSince();
   if (USE_MOCK) return mockApi.fetchDanmakuSince(since);
   const r = await request(`/api/danmaku?since=${since}`, DanmakuListResponse);
   return r.ok ? { ok: true, data: r.data.danmaku } : r;
 }
 
 export async function fetchSettings(): Promise<ApiResult<Settings>> {
+  if (ARCHIVE) return archiveApi.fetchSettings();
   if (USE_MOCK) return mockApi.fetchSettings();
   return request("/api/settings", Settings);
 }

@@ -1,8 +1,10 @@
 // Live updates over Supabase Realtime Broadcast (#4). One private channel, `live`, shared by every
 // hook on the page. Only the server sends (lib/supabase, #5); browsers only listen.
-// In mock mode (NEXT_PUBLIC_USE_MOCK=1) the events come from lib/mock instead.
+// In mock mode (NEXT_PUBLIC_USE_MOCK=1) the events come from lib/mock instead; archive mode
+// (lib/archive) has no live events at all.
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { z } from "zod";
+import { ARCHIVE } from "./archive";
 import { startMockLive, USE_MOCK } from "./mock";
 import { Danmaku, DanmakuRemove, Note, NoteHide, PhotoFinal, Settings } from "./schemas";
 import { supabaseBrowser } from "./supabase/browser";
@@ -52,6 +54,10 @@ function setStatus(next: LiveStatus) {
 }
 
 function connect(): () => void {
+  if (ARCHIVE) {
+    setStatus("disconnected");
+    return () => {};
+  }
   if (USE_MOCK) {
     setStatus("connected");
     return startMockLive(dispatchLive, setStatus);

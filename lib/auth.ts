@@ -3,10 +3,12 @@
 // still read them. One state for the whole page, shared by every guestbook's pad:
 //   const { member, signIn, signOut, recheck } = useMember();
 // Sign-in leaves the site for Google and comes back through /auth/callback, which returns to the
-// page the reader was on. In mock mode the state is fake and set with __mock.auth() (lib/mock).
+// page the reader was on. In mock mode the state is fake and set with __mock.auth() (lib/mock); in
+// archive mode (lib/archive) nobody signs in.
 import type { Session } from "@supabase/supabase-js";
 import { useSyncExternalStore } from "react";
 import { fetchMe } from "./api";
+import { ARCHIVE } from "./archive";
 import { mockAuth, USE_MOCK, type MockAuth } from "./mock";
 import { supabaseAuth } from "./supabase/browser";
 
@@ -79,6 +81,7 @@ function apply(session: Session | null) {
 function start() {
   if (started) return;
   started = true;
+  if (ARCHIVE) return set({ status: "signedOut" });
   if (USE_MOCK) {
     const sync = () => set(MOCK_MEMBERS[mockAuth.get()]);
     mockAuth.subscribe(sync);
@@ -103,6 +106,7 @@ const SERVER_MEMBER: Member = { status: "loading" };
 
 /** Leaves for Google's sign-in, asking which account to use, and comes back to this page. */
 async function signIn() {
+  if (ARCHIVE) return;
   if (USE_MOCK) return mockAuth.set("allowed");
   const supabase = supabaseAuth();
   if (!supabase) return;

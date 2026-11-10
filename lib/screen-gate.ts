@@ -6,6 +6,7 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { connection, NextResponse, type NextRequest } from "next/server";
+import { ARCHIVE } from "./archive";
 import { USE_MOCK } from "./mock";
 
 export const SCREEN_COOKIE = "screen";
@@ -65,10 +66,12 @@ export function handleScreenKey(request: NextRequest): NextResponse | null {
 
 /**
  * On the server: whether this request comes from the projector. Mock mode always says yes, so the
- * danmaku layer can be built locally without a key; without SCREEN_KEY it always says no.
+ * danmaku layer can be built locally without a key; archive mode (lib/archive) and a missing
+ * SCREEN_KEY always say no.
  * Reads cookies(), so with Cache Components the caller must sit inside a <Suspense> boundary.
  */
 export async function isProjector() {
+  if (ARCHIVE) return false;
   if (USE_MOCK) return true;
   const secret = process.env.SCREEN_KEY;
   if (!secret) return false;

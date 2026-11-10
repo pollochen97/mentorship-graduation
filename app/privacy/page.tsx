@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "隱私權政策 · ENG曼陀號" };
  * The privacy policy (#56). Google needs its URL to publish the guestbook's sign-in (#55) to
  * everyone; it describes what the site actually keeps, so update it when that changes. Linked from
  * the sign-in on the guestbook, /danmaku, /auth/callback and the cover. The deletion date and the
- * 7-day promise are tracked in #61.
+ * 7-day promise are tracked in #61; the archive (spec 3.6) keeps the notes in the public repo.
  */
 export default function PrivacyPage() {
   return (
@@ -52,6 +52,21 @@ export default function PrivacyPage() {
           <li>管理員可以隱藏不當的留言或彈幕。</li>
         </ul>
 
+        <h2 className={styles.heading}>活動結束後的封存</h2>
+        <ul className={styles.list}>
+          <li>
+            留言板關閉後，我們把網站上公開顯示的留言內容和署名匯出成網站的一部分，讓網站在停用資料庫後仍然保留。匯出的內容不包含
+            email 或任何 Google 帳號資料。
+          </li>
+          <li>
+            這份封存存放在網站公開的程式碼庫（GitHub），任何人都看得到。彈幕和大合照不會封存。
+          </li>
+          <li>
+            如果你不希望自己的留言被保留，請寄信到下方的信箱，我們會從網站和程式碼庫的目前版本移除。已經寫進
+            Git 版本紀錄的內容，即使移除，仍可能留在過去的版本中。
+          </li>
+        </ul>
+
         <h2 className={styles.heading}>防洗版用的資料</h2>
         <ul className={styles.list}>
           <li>
@@ -66,7 +81,8 @@ export default function PrivacyPage() {
           <li>我們不會出售、出租或分享你的資料給任何人。</li>
           <li>
             資料只交由代我們提供服務的 Supabase（資料庫與登入）和
-            Vercel（網站主機）存放與處理，它們只依我們的設定提供服務。
+            Vercel（網站主機）存放與處理，它們只依我們的設定提供服務。封存後的公開留言另外存放在
+            GitHub（見上方「活動結束後的封存」）。
           </li>
           <li>能看到 email 的只有網站管理員。</li>
         </ul>
@@ -84,7 +100,7 @@ export default function PrivacyPage() {
             處理並回信；如果你也希望刪除自己的留言，請在信中說明，留言會一併刪除。
           </li>
           <li>
-            除非你要求刪除，已公開的留言內容和署名會保留在網站上，但刪除帳號資料後就不再和你的
+            除非你要求刪除，已公開的留言內容和署名會保留在網站和封存中，但刪除帳號資料後就不再和你的
             Google 帳號有關聯。
           </li>
           <li>對這份政策有任何問題，也歡迎寄信到上面的信箱。</li>

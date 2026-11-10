@@ -1,0 +1,156 @@
+{
+  "notes": [
+    {
+      "id": "3fb7a709-ee56-4179-9740-9e94c8bf315f",
+      "section": "m1",
+      "name": "Hannah",
+      "body": "成為卓越軟體工程師,善用AI工具做筆記,也要慢慢養成自己的判斷力!學習正確犯錯!",
+      "color": 1,
+      "createdAt": "2026-10-23T09:56:14.953Z"
+    },
+    {
+      "id": "79eb55de-687e-4e9b-860c-3e1320c8a565",
+      "section": "m3",
+      "name": "Alson",
+      "body": "PM 組的展示超有趣,找合作組別很刺激,還很有幸看到兩位船長的思想碰撞()?",
+      "color": 0,
+      "createdAt": "2026-10-23T13:08:57.304Z"
+    },
+    {
+      "id": "5a720c4b-1fe9-492b-b652-6f3b420a0ffe",
+      "section": "m3",
+      "name": "琪雯",
+      "body": "爐邊會談超精彩🌟John和Jack的分享,搭配Jill的主持,收穫滿滿!",
+      "color": 3,
+      "createdAt": "2026-10-23T15:20:26.529Z"
+    },
+    {
+      "id": "cd3c0ddf-152a-4eac-811d-216cd9c448ff",
+      "section": "m4",
+      "name": "Kelly Ko",
+      "body": "想到要上台報告就瑟瑟發抖",
+      "color": 0,
+      "createdAt": "2026-11-01T13:52:14.947Z"
+    },
+    {
+      "id": "792272c4-ea5e-4467-b8d6-cde5df178e9c",
+      "section": "m3",
+      "name": "Kelly Ko",
+      "body": "覺得兩位船長搭配的超棒!",
+      "color": 0,
+      "createdAt": "2026-11-01T13:53:00.081Z"
+    },
+    {
+      "id": "812f6c0c-8b97-4d13-97ad-44699bd1f13c",
+      "section": "m1",
+      "name": "Kelly Ko",
+      "body": "回家開始效法船長,利用通勤時間讀書,不放過可以學習的機會!還試過從信義區騎腳踏車回北投,通勤兼運動!",
+      "color": 0,
+      "createdAt": "2026-11-01T13:55:39.854Z"
+    },
+    {
+      "id": "a29d14a1-aa54-4b69-8e1b-a2395fe3640b",
+      "section": "m1",
+      "name": "Serene Chao",
+      "body": "保持好奇、持續的學習!Keep going✨",
+      "color": 0,
+      "createdAt": "2026-11-04T05:20:19.476Z"
+    },
+    {
+      "id": "c9316a51-c4e6-4c93-8adf-5bb6c7cca9a5",
+      "section": "m4",
+      "name": "Jill",
+      "body": "我自己都很想下去玩PMxENG的跨組專案!過程歷經波折,大家很辛苦,感謝大家對引水人的包容!!!",
+      "color": 3,
+      "createdAt": "2026-11-04T06:23:04.210Z"
+    },
+    {
+      "id": "36e565f2-8541-4b77-8c8e-924d8cea57b7",
+      "section": "m4",
+      "name": "Lee Jessy",
+      "body": "那幾周平日凌晨三點還可以看到組員們發PR ,每個人肝都不要了XD,結束後真有一種大家一起共換難的感覺",
+      "color": 2,
+      "createdAt": "2026-11-04T06:35:16.284Z"
+    },
+    {
+      "id": "1a34a110-6d87-4624-9d6c-1de6b3084a8f",
+      "section": "m2",
+      "name": "Hannah Chen",
+      "body": "月會之後我就愛上了 SDD 開發!讓 AI 開發可以更接近目標結果",
+      "color": 0,
+      "createdAt": "2026-11-04T07:31:55.803Z"
+    },
+    {
+      "id": "74c0623c-4ff6-40fa-b826-e4525bb27cfc",
+      "section": "m4",
+      "name": "Hannah Chen",
+      "body": "謝謝超給力組員們!好幾天都是集體當薪水小偷衝專案的進度XDD 各組的專案都好精彩,真的太強哩~",
+      "color": 0,
+      "createdAt": "2026-11-04T07:33:33.691Z"
+    },
+    {
+      "id": "d47af29e-52e9-462c-b6f1-069ef479b03a",
+      "section": "m4",
+      "name": "Jessica Chou",
+      "body": "下班後除了吃飯睡覺,就是在寫code。沒有想到會參加一個月的黑客松,大家一起燃燒生命🔥",
+      "color": 3,
+      "createdAt": "2026-11-05T14:22:20.554Z"
+    },
+    {
+      "id": "910c6eff-4f15-4df5-a820-6a4f781c2264",
+      "section": "m2",
+      "name": "Alson",
+      "body": "工程師從被寫 Code 折磨變被寫 Spec 折磨QQ",
+      "color": 1,
+      "createdAt": "2026-11-07T00:40:46.111Z"
+    },
+    {
+      "id": "e68c4928-3342-4a96-b40b-2538fdcf42d4",
+      "section": "m1",
+      "name": "Alson",
+      "body": "工程師要努力學會說人話!",
+      "color": 1,
+      "createdAt": "2026-11-07T00:41:21.002Z"
+    },
+    {
+      "id": "e7985418-97c9-41fa-9ccb-d3a837f350eb",
+      "section": "m4",
+      "name": "Alson",
+      "body": "最後一舞,報告完瞬間又釋懷又空虛",
+      "color": 1,
+      "createdAt": "2026-11-07T00:42:39.934Z"
+    },
+    {
+      "id": "e97d8257-850b-4cbe-8ce5-3a355a0c6002",
+      "section": "m3",
+      "name": "則元",
+      "body": "雖然冷氣很冷,但大家都很熱情",
+      "color": 1,
+      "createdAt": "2026-11-07T00:43:28.248Z"
+    },
+    {
+      "id": "5b912783-9c2e-4fd4-a9ba-73cda953e5cf",
+      "section": "m1",
+      "name": "則元",
+      "body": "聽完分享發現平常有多浪費 Token⋯",
+      "color": 1,
+      "createdAt": "2026-11-07T00:48:20.353Z"
+    },
+    {
+      "id": "4a75d907-58c3-4e69-b845-460135b3a48a",
+      "section": "m4",
+      "name": "Wynn Su",
+      "body": "好喜歡一起做產品,一起跟大家交流,然後也得到 John 的建議 <3",
+      "color": 1,
+      "createdAt": "2026-11-07T05:16:48.052Z"
+    },
+    {
+      "id": "5317bf3d-5649-4e4d-a885-fc40bc044e35",
+      "section": "m3",
+      "name": "Wynn Su",
+      "body": "跟 PM 交流有趣!",
+      "color": 1,
+      "createdAt": "2026-11-07T05:17:19.104Z"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 // Guestbook notes (#15, spec 5.3). Reads and writes go through the service role; browsers never
 // touch the notes table directly.
 import type { NextRequest } from "next/server";
-import { errorResponse, readJson } from "@/lib/http";
+import { archivedResponse, errorResponse, readJson } from "@/lib/http";
 import { isForbidden, NormalizedText } from "@/lib/profanity";
 import { readPoster } from "@/lib/ratelimit";
 import { NoteInput, NoteSection } from "@/lib/schemas";
@@ -22,6 +22,8 @@ const PAGE_SIZE = 1000;
 
 /** GET /api/notes?section=m1 → { notes }: the visible notes of one guestbook, oldest first. */
 export async function GET(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const section = NoteSection.safeParse(request.nextUrl.searchParams.get("section"));
   if (!section.success) return errorResponse("invalid_input", "section 必須是 m1–m4");
 
@@ -56,6 +58,8 @@ export async function GET(request: NextRequest) {
  * sign-in on the whitelist (#55), sent as `Authorization: Bearer <access token>`.
  */
 export async function POST(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const poster = readPoster(request);
   if (!poster.ok) return errorResponse(poster.code);
   const member = await readMember(request);

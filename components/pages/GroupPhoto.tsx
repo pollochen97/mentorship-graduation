@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useBook, usePageActive } from "@/components/book/BookContext";
 import type { PageProps } from "@/components/book/types";
 import { Stamp, Tag } from "@/components/ui";
+import { ARCHIVE } from "@/lib/archive";
 import { useSettings } from "@/lib/hooks";
 import styles from "./group-photo/GroupPhoto.module.css";
 
@@ -19,6 +20,8 @@ const DEVELOP_MS = 3200;
  * The group photo the admin uploads on the day (#20). Everyone loads it once; only the projector
  * follows photo:final (spec 3.5), swaps the new photo in and develops it, and settings:update, which
  * can also take the photo away again (#64).
+ * The archived site (lib/archive) has no photo: it was shared with the guests privately instead of
+ * being kept in the public repo.
  */
 export function GroupPhoto({ no, label }: PageProps) {
   const { isProjector } = useBook();
@@ -68,7 +71,8 @@ export function GroupPhoto({ no, label }: PageProps) {
 
   let status: string | null = null;
   if (!shown) {
-    if (failed) status = "照片載入失敗，請重新整理";
+    if (ARCHIVE) status = "大合照已另外分享給夥伴，不公開在網站上";
+    else if (failed) status = "照片載入失敗，請重新整理";
     else if (loading || finalPhotoUrl) status = "照片載入中…";
     else status = "等待合照上傳中…";
   }
@@ -84,7 +88,8 @@ export function GroupPhoto({ no, label }: PageProps) {
           2026.11.07
         </Stamp>
         <p className={styles.text}>
-          結業發表的最後，全體水手和工作人員站在一起。這張照片在現場拍下，直接出現在這一頁。
+          結業發表的最後，全體水手和工作人員站在一起。這張照片在現場拍下，
+          {ARCHIVE ? "當天直接出現在這一頁。" : "直接出現在這一頁。"}
         </p>
       </div>
       <figure className={styles.frame}>

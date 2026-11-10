@@ -2,7 +2,7 @@
 // projector (note:hide), which removes it from or puts it back on the guestbook.
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { errorResponse, readJson } from "@/lib/http";
+import { archivedResponse, errorResponse, readJson } from "@/lib/http";
 import { broadcast } from "@/lib/supabase/broadcast";
 import { toNote } from "@/lib/supabase/rows";
 import { supabaseAdmin } from "@/lib/supabase/server";
@@ -11,6 +11,8 @@ import { ADMIN_NOTE_COLUMNS, toAdminNotes } from "../../rows";
 import { HideInput } from "../../schemas";
 
 export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/admin/notes/[id]">) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 

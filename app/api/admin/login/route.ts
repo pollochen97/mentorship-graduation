@@ -1,6 +1,6 @@
 // POST /api/admin/login (#19): the password from ADMIN_PASSWORD → the signed admin cookie.
 import { NextResponse, type NextRequest } from "next/server";
-import { errorResponse, readJson } from "@/lib/http";
+import { archivedResponse, errorResponse, readJson } from "@/lib/http";
 import { adminSecret, checkPassword, MIN_PASSWORD_LENGTH, setAdminCookie } from "../auth";
 import { LoginInput } from "../schemas";
 
@@ -11,6 +11,8 @@ import { LoginInput } from "../schemas";
 const WRONG_PASSWORD_DELAY_MS = 1000;
 
 export async function POST(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   if (!adminSecret()) {
     console.error(
       `[admin/login] ADMIN_PASSWORD is missing or shorter than ${MIN_PASSWORD_LENGTH} characters; ` +
