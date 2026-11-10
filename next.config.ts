@@ -5,6 +5,12 @@ import type { NextConfig } from "next";
 // at runtime, so the real names and photos never reach the demo's bundle.
 const DEMO_CONTENT = ["sailors", "staff", "sections", "projects"];
 const demo = process.env.NEXT_PUBLIC_CONTENT === "demo";
+// Made-up people over real data would be worse than either: the demo must never reach the real API.
+if (demo && process.env.NEXT_PUBLIC_USE_MOCK !== "1") {
+  throw new Error(
+    "NEXT_PUBLIC_CONTENT=demo 需要搭配 NEXT_PUBLIC_USE_MOCK=1，否則展示站會連到真實的後端",
+  );
+}
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
