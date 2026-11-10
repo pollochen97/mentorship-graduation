@@ -86,7 +86,7 @@ flowchart LR
     storage -. 照片 .-> projector
 ```
 
-所有寫入都經過 API，瀏覽器沒有任何資料表的寫入權限；投影端只透過 Realtime 接收。
+所有資料表寫入都經過 API，瀏覽器沒有任何資料表的寫入權限。大合照的檔案則不經過 API：管理員的手機向 API 取得 signed upload URL 後，直接上傳到 Storage（[流程](docs/portfolio/group-photo.md)）。投影端只透過 Realtime 接收。
 
 ## 技術上的決策
 
@@ -95,7 +95,7 @@ Vercel 是 serverless，無法維持 WebSocket 長連線，所以即時推播交
 → [`supabase/migrations/…_realtime.sql`](supabase/migrations/20261022000003_realtime.sql)、[`lib/realtime.ts`](lib/realtime.ts)
 
 **只讓投影電腦訂閱 Realtime。**
-任何人都能翻書、留言，但只有開過 `/?key=<SCREEN_KEY>`、拿到簽章 cookie（HMAC，48 小時到期）的投影電腦會訂閱，免費方案的連線數和訊息量都留給真正需要的螢幕。
+任何人都能翻書和看留言（只有白名單內的 ENG 夥伴能留言），但只有開過 `/?key=<SCREEN_KEY>`、拿到簽章 cookie（HMAC，48 小時到期）的投影電腦會訂閱，免費方案的連線數和訊息量都留給真正需要的螢幕。
 → [`lib/screen-gate.ts`](lib/screen-gate.ts)
 
 **限流寫在 Postgres function 裡。**
