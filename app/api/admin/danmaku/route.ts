@@ -1,6 +1,6 @@
 // GET /api/admin/danmaku (#19) → { danmaku }: the newest 50, newest first, hidden ones included.
 import type { NextRequest } from "next/server";
-import { errorResponse } from "@/lib/http";
+import { archivedResponse, errorResponse } from "@/lib/http";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "../auth";
 import { ADMIN_DANMAKU_COLUMNS, toAdminDanmaku } from "../rows";
@@ -8,6 +8,8 @@ import { ADMIN_DANMAKU_COLUMNS, toAdminDanmaku } from "../rows";
 const LIMIT = 50;
 
 export async function GET(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 

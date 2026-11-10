@@ -1,7 +1,7 @@
 // GET /api/admin/notes?section=m1 (#19) → { notes }: newest first, hidden ones included. Without
 // `section`, every guestbook.
 import type { NextRequest } from "next/server";
-import { errorResponse } from "@/lib/http";
+import { archivedResponse, errorResponse } from "@/lib/http";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "../auth";
 import { ADMIN_NOTE_COLUMNS, toAdminNotes } from "../rows";
@@ -11,6 +11,8 @@ import { NotesFilter } from "../schemas";
 const LIMIT = 200;
 
 export async function GET(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 

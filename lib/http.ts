@@ -1,5 +1,6 @@
 // Helpers for API route handlers (#15, #17, #19, #20), so every route answers in the same format.
 import type { z } from "zod";
+import { ARCHIVE } from "./archive";
 import { ERROR_MESSAGES, ERROR_STATUS, type ErrorCode } from "./schemas";
 
 /** An error response with the shared body `{ error: { code, message, retryAfter? } }`. */
@@ -32,4 +33,17 @@ export async function readJson<S extends z.ZodType>(
     ? `${issue.path.join(".")}：${issue.message}`
     : ERROR_MESSAGES.invalid_input;
   return { ok: false, response: errorResponse("invalid_input", message) };
+}
+
+/**
+ * Archive mode (lib/archive, spec 3.6): the archived site never calls the API, and no route may touch
+ * Supabase while its variables are still set. Every handler starts with
+ *
+ *   const archived = archivedResponse();
+ *   if (archived) return archived;
+ *
+ * (lib/archive/routes.test.ts checks that none is missing.)
+ */
+export function archivedResponse() {
+  return ARCHIVE ? errorResponse("not_found", "網站已封存，不再提供這個 API") : null;
 }

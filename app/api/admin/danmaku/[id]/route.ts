@@ -2,7 +2,7 @@
 // at once (danmaku:remove); un-hiding only undoes a mistake in the list, it doesn't fly again.
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { errorResponse, readJson } from "@/lib/http";
+import { archivedResponse, errorResponse, readJson } from "@/lib/http";
 import { broadcast } from "@/lib/supabase/broadcast";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { requireAdmin } from "../../auth";
@@ -12,6 +12,8 @@ import { HideInput } from "../../schemas";
 const Id = z.coerce.number().int().positive();
 
 export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/admin/danmaku/[id]">) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 

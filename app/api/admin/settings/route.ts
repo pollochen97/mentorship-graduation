@@ -2,7 +2,7 @@
 // (#55): it writes settings and sends settings:update, so the projector hides or shows danmaku at once,
 // POST /api/danmaku answers 503 and POST /api/notes answers notes_closed.
 import type { NextRequest } from "next/server";
-import { errorResponse, readJson } from "@/lib/http";
+import { archivedResponse, errorResponse, readJson } from "@/lib/http";
 import { broadcast } from "@/lib/supabase/broadcast";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { readSettings } from "../../settings/read";
@@ -10,6 +10,8 @@ import { requireAdmin } from "../auth";
 import { SettingsInput } from "../schemas";
 
 export async function GET(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 
@@ -18,6 +20,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 

@@ -2,7 +2,7 @@
 // GET ?since= while Realtime is down. Everything goes through the service role.
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { errorResponse, readJson } from "@/lib/http";
+import { archivedResponse, errorResponse, readJson } from "@/lib/http";
 import { isForbidden, NormalizedText } from "@/lib/profanity";
 import { readPoster } from "@/lib/ratelimit";
 import { DanmakuInput } from "@/lib/schemas";
@@ -22,6 +22,8 @@ const SINCE_LIMIT = 50;
 
 /** GET /api/danmaku?since=<id> → { danmaku }: visible danmaku newer than `since`, oldest first. */
 export async function GET(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const since = z.coerce
     .number()
     .int()
@@ -45,6 +47,8 @@ export async function GET(request: NextRequest) {
 
 /** POST /api/danmaku (DanmakuInput) → 201 { danmaku }, then danmaku:new to the projector. */
 export async function POST(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const poster = readPoster(request);
   if (!poster.ok) return errorResponse(poster.code);
 

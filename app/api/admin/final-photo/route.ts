@@ -8,7 +8,7 @@
 // settings:update, so the projector shows "waiting for the photo" again. The files stay in Storage.
 import { randomBytes } from "node:crypto";
 import type { NextRequest } from "next/server";
-import { errorResponse, readJson } from "@/lib/http";
+import { archivedResponse, errorResponse, readJson } from "@/lib/http";
 import { broadcast } from "@/lib/supabase/broadcast";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { readSettings } from "../../settings/read";
@@ -19,6 +19,8 @@ import { FinishInput } from "./schemas";
 const BUCKET = "final-photo";
 
 export async function POST(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 
@@ -33,6 +35,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 
@@ -66,6 +70,8 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const archived = archivedResponse();
+  if (archived) return archived;
   const denied = requireAdmin(request);
   if (denied) return denied;
 
