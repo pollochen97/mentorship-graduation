@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:demo": "node scripts/demo/strip-photos.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
