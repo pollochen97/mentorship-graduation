@@ -19,16 +19,21 @@ export default function PrivacyPage() {
         <h1 className={styles.title}>隱私權政策</h1>
         <p className={styles.lead}>
           這個網站是 ENG曼陀號結業分享的紀念網站，由
-          ENG曼陀號的工作人員維護。活動已經結束，網站現在是唯讀的封存版。以下說明現在的網站保存哪些資料，以及活動期間收集的資料如何處理。
+          ENG曼陀號的工作人員維護。活動已經結束，網站現在是唯讀的封存版。以下說明現在瀏覽網站時有哪些資料會被處理，以及活動期間收集的資料如何處理。
         </p>
 
         <h2 className={styles.heading}>現在的網站</h2>
         <ul className={styles.list}>
-          <li>網站已經不能登入、留言或發彈幕，也不再收集或保存任何資料。</li>
-          <li>網站不會設定 cookie，也不會記錄你的 IP 位址。</li>
+          <li>網站已經不能登入、留言或發彈幕。</li>
           <li>
-            網站由 Vercel 代管，Vercel
-            會依它自己的服務規範處理一般的連線紀錄，我們不會另外取用這些紀錄。
+            我們（網站的維護者）不再主動收集或保存你的任何資料：網站不會設定
+            cookie，不使用分析或追蹤工具，我們也不會記錄你的 IP 位址。
+          </li>
+          <li>
+            網站由 Vercel 代管。和一般的網站主機一樣，你連線到網站時，Vercel 可能依它的{" "}
+            <a href="https://vercel.com/legal/privacy-policy">隱私權聲明</a>
+            處理連線資料，例如你的 IP 位址、由 IP
+            推算的大致位置，以及瀏覽器和裝置的系統資訊。我們不會另外取用或保存這些資料。
           </li>
         </ul>
 
@@ -93,7 +98,7 @@ export default function PrivacyPage() {
           <li>我們沒有出售、出租或分享任何人的資料給其他人。</li>
           <li>
             活動期間的資料只交由代我們提供服務的 Supabase（資料庫與登入）和
-            Vercel（網站主機）存放與處理；Supabase 的資料已經全部刪除。
+            Vercel（網站主機）存放與處理；存放這些資料的 Supabase 專案已經整個刪除。
           </li>
         </ul>
 
