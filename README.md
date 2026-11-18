@@ -1,5 +1,7 @@
 # ENG曼陀號結業分享
 
+**中文** | [English](README.en.md)
+
 **一本在現場投影的翻頁「航海日誌」網站。來賓用手機掃 QR code，彈幕就會即時飄過投影幕。**
 
 **展示站：[mentorship-graduation-demo.vercel.app](https://mentorship-graduation-demo.vercel.app)**（mock 模式：學員、工作人員和照片換成假資料，彈幕是自動產生的。按 F 全螢幕，用方向鍵或滾輪翻頁。）
